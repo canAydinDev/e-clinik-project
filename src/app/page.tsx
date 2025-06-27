@@ -4,7 +4,9 @@ export default function Home() {
   return (
     <div>
       <h1>Hello</h1>
-      <Button variant="elevated">Click Me</Button>
+      <Button variant="elevated" size="lg">
+        Click Me
+      </Button>
     </div>
   );
 }
