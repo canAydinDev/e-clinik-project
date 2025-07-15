@@ -120,3 +120,18 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .shad-input {
+    @apply placeholder:text-gray-600  border-gray-900  h-11 focus-visible:ring-0 focus-visible:ring-offset-0;
+  }
+  .input-phone {
+    @apply mt-2 h-11 rounded-md px-3 text-sm border  border-gray-900;
+  }
+  .input-phone input:focus {
+    @apply outline-none shadow-none ring-0 ring-offset-0;
+  }
+  .shad-primary-btn {
+    @apply bg-green-500 text-white;
+  }
+}

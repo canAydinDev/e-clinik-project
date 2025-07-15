@@ -53,7 +53,7 @@ export const Navbar = () => {
             playFair.className
           )}
         >
-          ŞahinKlinik
+          MyKlinik
         </span>
       </Link>
       <NavbarSidebar
