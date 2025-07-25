@@ -1,4 +1,3 @@
-import { GenderOptions } from "@/constants";
 import { z } from "zod";
 
 export const UserFormValidation = z
@@ -7,7 +6,7 @@ export const UserFormValidation = z
       .string()
       .min(3, "İsim en az 3 karakter olmalıdır")
       .max(50, "İsim en fazla 50 karakter olabilir"),
-    email: z.string().optional(),
+    email: z.string(),
 
     phone: z
       .string()
@@ -17,7 +16,7 @@ export const UserFormValidation = z
       ),
     password: z
       .string()
-      .regex(/^\d{6}$/, "Şifre 6 haneli ve sadece rakamlardan oluşmalıdır"),
+      .regex(/^\d{8}$/, "Şifre 8 haneli ve sadece rakamlardan oluşmalıdır"),
 
     confirmPassword: z.string(),
   })
@@ -26,7 +25,7 @@ export const UserFormValidation = z
     path: ["confirmPassword"],
   });
 
-export const PatientFormValidation2 = z.object({
+export const PatientFormValidation = z.object({
   name: z
     .string()
     .min(2, "İsim en az 2 karakter olmalıdır")
@@ -39,7 +38,7 @@ export const PatientFormValidation2 = z.object({
       "Geçersiz telefon numarası"
     ),
   birthDate: z.coerce.date(),
-  gender: z.enum(GenderOptions),
+
   address: z
     .string()
     .min(5, "Adres en az 5 karakter olmalıdır")
@@ -58,46 +57,15 @@ export const PatientFormValidation2 = z.object({
       (emergencyContactNumber) => /^\+\d{10,15}$/.test(emergencyContactNumber),
       "Geçersiz telefon numarası"
     ),
-  primaryPhysician: z.string().min(2, "Lütfen bir doktor seçin"),
-  insuranceProvider: z
-    .string()
-    .min(2, "Sigorta sağlayıcısı en az 2 karakter olmalıdır")
-    .max(50, "Sigorta sağlayıcısı en fazla 50 karakter olabilir"),
-  insurancePolicyNumber: z
-    .string()
-    .min(2, "Poliçe numarası en az 2 karakter olmalıdır")
-    .max(50, "Poliçe numarası en fazla 50 karakter olabilir"),
-  allergies: z.string().optional(),
+
   currentMedication: z.string().optional(),
   familyMedicalHistory: z.string().optional(),
   pastMedicalHistory: z.string().optional(),
-  identificationType: z.string().optional(),
-  identificationNumber: z
-    .string()
-    .length(11, { message: "Kimlik numarası tam olarak 11 haneli olmalıdır." }),
-  identificationDocument: z.custom<File[]>().optional(),
-  treatmentConsent: z
-    .boolean()
-
-    .refine((value) => value === true, {
-      message: "Devam edebilmek için tedavi onayı vermelisiniz",
-    }),
-  disclosureConsent: z
-    .boolean()
-
-    .refine((value) => value === true, {
-      message: "Devam edebilmek için bilgi paylaşımı onayı vermelisiniz",
-    }),
-  privacyConsent: z
-    .boolean()
-
-    .refine((value) => value === true, {
-      message: "Devam edebilmek için gizlilik politikasını kabul etmelisiniz",
-    }),
+  identificationNumber: z.string().optional(),
+  face: z.custom<File[]>().optional(),
 });
 
 export const CreateAppointmentSchema = z.object({
-  primaryPhysician: z.string().min(2, "Lütfen bir doktor seçin"),
   schedule: z.coerce.date(),
   reason: z
     .string()
@@ -108,7 +76,6 @@ export const CreateAppointmentSchema = z.object({
 });
 
 export const ScheduleAppointmentSchema = z.object({
-  primaryPhysician: z.string().min(2, "Lütfen bir doktor seçin"),
   schedule: z.coerce.date(),
   reason: z.string().optional(),
   note: z.string().optional(),
@@ -116,7 +83,6 @@ export const ScheduleAppointmentSchema = z.object({
 });
 
 export const CancelAppointmentSchema = z.object({
-  primaryPhysician: z.string().min(2, "Lütfen bir doktor seçin"),
   schedule: z.coerce.date(),
   reason: z.string().optional(),
   note: z.string().optional(),

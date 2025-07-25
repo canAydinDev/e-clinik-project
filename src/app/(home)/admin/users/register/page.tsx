@@ -4,7 +4,7 @@ import React from "react";
 const Page = () => {
   return (
     <div className=" mx-10 ">
-      <div>Patient Registration</div>
+      <div>Yeni Kullanici Kaydi</div>
       <div>
         <UserRegistrationForm />
       </div>
