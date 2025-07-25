@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation";
 import { NavbarSidebar } from "../navbar-sidebar";
 import { useState } from "react";
 import { MenuIcon } from "lucide-react";
+import { logout } from "@/lib/client/auth";
 
 const playFair = Playfair_Display({
   subsets: ["latin"],
@@ -36,9 +37,8 @@ const NavbarItem = ({ href, children, isActive }: NavbarItemProps) => {
 };
 
 const navbarItems = [
-  { href: "/", children: "Anasayfa" },
-  { href: "/patients", children: "Hastalar" },
-  { href: "/appointments", children: "Randevular" },
+  { href: "/dashboard/patients", children: "Hastalar" },
+  { href: "/dashboard/appointments", children: "Randevular" },
 ];
 
 export const Navbar = () => {
@@ -46,7 +46,7 @@ export const Navbar = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   return (
     <nav className="h-20 flex border-b justify-between font-medium bg-white">
-      <Link href="/" className="pl-6 my-auto flex items-center">
+      <Link href="/dashboard" className="pl-6 my-auto flex items-center">
         <span
           className={cn(
             "text-5xl font-semibold text-[#654a4e]",
@@ -74,11 +74,8 @@ export const Navbar = () => {
         ))}
       </div>
       <div className="items-center hidden lg:flex mr-3 ">
-        <Button asChild>
-          <Link href="/sign-in">Giriş Yap</Link>
-        </Button>
-        <Button asChild>
-          <Link href="/register">Yeni Kayıt</Link>
+        <Button asChild onClick={() => logout()}>
+          <Link href="/">Çıkış</Link>
         </Button>
       </div>
       <div className="flex lg:hidden items-center justify-center">

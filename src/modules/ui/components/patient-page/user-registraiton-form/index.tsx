@@ -1,47 +1,47 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { Form } from "@/components/ui/form";
 import { CustomFormField } from "../custom-form-field";
-import { FormFieldType } from "@/modules/utils/enums/enums";
 import { SubmitButton } from "../submit-button";
-import { useState } from "react";
+
 import { UserFormValidation } from "@/lib/validation";
-import { useRouter } from "next/navigation";
 import { createUser } from "@/lib/actions/patient.actions";
+import { FormFieldType } from "../patient-form";
+import { UserFormData } from "../../../../../../types/form";
 
 export const UserRegistrationForm = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const form = useForm<z.infer<typeof UserFormValidation>>({
+
+  const form = useForm<UserFormData>({
     resolver: zodResolver(UserFormValidation),
     defaultValues: {
       name: "",
       email: "",
       phone: "",
       password: "",
+      confirmPassword: "",
     },
   });
 
-  async function onSubmit({
-    name,
-    email,
-    phone,
-  }: z.infer<typeof UserFormValidation>) {
+  async function onSubmit(data: UserFormData) {
+    const { name, email, phone, password } = data;
     setIsLoading(true);
 
     try {
-      const userData = { name, email, phone };
-
-      const user = await createUser(userData);
+      const user = await createUser({ name, email, phone, password });
       if (user) {
-        router.push("/patients");
+        router.push("/admin/users-detail");
       }
     } catch (error) {
-      console.log(error);
+      console.error("Kullanıcı oluşturulurken hata:", error);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -49,20 +49,21 @@ export const UserRegistrationForm = () => {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 flex-1">
         <section className="mb-12 space-y-4">
-          <h1>Yeni Kayit</h1>
-          <p>Yeni kayit yapabilirsiniz</p>
+          <h1>Yeni Kayıt</h1>
+          <p>Yeni kayıt yapabilirsiniz</p>
         </section>
-        <CustomFormField
+
+        <CustomFormField<UserFormData>
           fieldType={FormFieldType.INPUT}
           control={form.control}
           name="name"
-          label="Isminiz"
+          label="İsminiz"
           placeholder="Can Aydin"
           iconSrc="/assets/icons/user-2.svg"
-          iconAlt="ism"
+          iconAlt="isim"
         />
 
-        <CustomFormField
+        <CustomFormField<UserFormData>
           fieldType={FormFieldType.INPUT}
           control={form.control}
           name="email"
@@ -71,27 +72,31 @@ export const UserRegistrationForm = () => {
           iconSrc="/assets/icons/email-3.svg"
           iconAlt="email"
         />
-        <CustomFormField
+
+        <CustomFormField<UserFormData>
           fieldType={FormFieldType.PASSWORD}
           control={form.control}
           name="password"
-          label="Sifre"
+          label="Şifre"
           placeholder="******"
         />
-        <CustomFormField
+
+        <CustomFormField<UserFormData>
           fieldType={FormFieldType.PASSWORD}
           control={form.control}
           name="confirmPassword"
           label="Şifre Tekrar"
           placeholder="******"
         />
-        <CustomFormField
+
+        <CustomFormField<UserFormData>
           fieldType={FormFieldType.PHONE_INPUT}
           control={form.control}
           name="phone"
           label="Telefon No"
           placeholder="(555) 123-4567"
         />
+
         <SubmitButton isLoading={isLoading}>Kaydet</SubmitButton>
       </form>
     </Form>
