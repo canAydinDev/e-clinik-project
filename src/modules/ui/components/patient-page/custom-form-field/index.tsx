@@ -100,7 +100,29 @@ const RenderField = <T extends FieldValues>({
 
     case FormFieldType.DATE_PICKER:
       return (
-        <div className="flex rounded-md border border-gray-600 ">
+        <div className="flex items-center rounded-md border border-gray-600 h-11 px-2">
+          <Image
+            src="/assets/icons/calendar.svg"
+            height={24}
+            width={24}
+            alt="takvim"
+            className="mr-2"
+          />
+          <FormControl className="w-full">
+            <DatePicker
+              selected={field.value}
+              onChange={(date) => field.onChange(date)}
+              dateFormat={dateFormat ?? "MM/dd/yyyy"}
+              showTimeSelect={showTimeSelect ?? false}
+              timeInputLabel="Time:"
+              className="w-full h-full text-14-medium outline-none border-none"
+            />
+          </FormControl>
+        </div>
+      );
+
+      return (
+        <div className="flex  rounded-md border border-gray-600  ">
           <Image
             src="/assets/icons/calendar.svg"
             height={24}
@@ -115,7 +137,7 @@ const RenderField = <T extends FieldValues>({
               dateFormat={dateFormat ?? "MM/dd/yyyy"}
               showTimeSelect={showTimeSelect ?? false}
               timeInputLabel="Time:"
-              wrapperClassName="overflow-hidden border-transparent w-full placeholder:text-gray-600   h-11 text-14-medium rounded-md px-3 outline-none"
+              wrapperClassName="overflow-hidden border-transparent w-full placeholder:text-gray-600   h-11 text-14-medium rounded-md px-3 outline-none  "
             />
           </FormControl>
         </div>

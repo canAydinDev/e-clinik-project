@@ -8,36 +8,18 @@ import { usePathname } from "next/navigation";
 import { NavbarSidebar } from "../navbar-sidebar";
 import { useState } from "react";
 import { MenuIcon } from "lucide-react";
-import { logout } from "@/lib/client/auth";
+
+import { AuthButton } from "../../auth/auth-button";
+import { NavbarItem } from "../navbar-items";
 
 const playFair = Playfair_Display({
   subsets: ["latin"],
   weight: ["700"],
 });
 
-interface NavbarItemProps {
-  href: string;
-  children: React.ReactNode;
-  isActive?: boolean;
-}
-
-const NavbarItem = ({ href, children, isActive }: NavbarItemProps) => {
-  return (
-    <Button
-      variant="outline"
-      asChild
-      className={cn(
-        "bg-transparent hover:bg-transparent text-lg px-3.5 rounded-full hover:border-primary border-transparent",
-        isActive && "bg-black text-white hover:bg-black hover:text-white"
-      )}
-    >
-      <Link href={href}>{children}</Link>
-    </Button>
-  );
-};
-
 const navbarItems = [
   { href: "/dashboard/patients", children: "Hastalar" },
+
   { href: "/dashboard/appointments", children: "Randevular" },
 ];
 
@@ -45,47 +27,49 @@ export const Navbar = () => {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   return (
-    <nav className="h-20 flex border-b justify-between font-medium bg-white">
-      <Link href="/dashboard" className="pl-6 my-auto flex items-center">
-        <span
-          className={cn(
-            "text-5xl font-semibold text-[#654a4e]",
-            playFair.className
-          )}
-        >
-          MyKlinik
-        </span>
-      </Link>
-      <NavbarSidebar
-        open={isSidebarOpen}
-        onOpenChange={setIsSidebarOpen}
-        items={navbarItems}
-      />
-
-      <div className="items-center gap-4 hidden lg:flex">
-        {navbarItems.map((item) => (
-          <NavbarItem
-            key={item.href}
-            href={item.href}
-            isActive={pathname === item.href}
+    <nav className="h-20 flex border-b justify-between font-medium bg-white mr-5">
+      <div className="flex items-center w-full gap-4 justify-between">
+        <Link href="/dashboard" className="pl-6 my-auto flex items-center">
+          <span
+            className={cn(
+              "text-5xl font-semibold text-[#654a4e]",
+              playFair.className
+            )}
           >
-            {item.children}
-          </NavbarItem>
-        ))}
-      </div>
-      <div className="items-center hidden lg:flex mr-3 ">
-        <Button asChild onClick={() => logout()}>
-          <Link href="/">Çıkış</Link>
-        </Button>
-      </div>
-      <div className="flex lg:hidden items-center justify-center">
-        <Button
-          variant="ghost"
-          className="size-12 border-transparent bg-white"
-          onClick={() => setIsSidebarOpen(true)}
-        >
-          <MenuIcon />
-        </Button>
+            MyKlinik
+          </span>
+        </Link>
+        <NavbarSidebar
+          open={isSidebarOpen}
+          onOpenChange={setIsSidebarOpen}
+          items={navbarItems}
+        />
+
+        <div className="items-center gap-4 hidden lg:flex ">
+          {navbarItems.map((item) => (
+            <NavbarItem
+              key={item.href}
+              href={item.href}
+              isActive={pathname === item.href}
+            >
+              {item.children}
+            </NavbarItem>
+          ))}
+        </div>
+
+        <div className="flex lg:hidden items-center justify-center">
+          <Button
+            variant="ghost"
+            className="size-12 border-transparent bg-white"
+            onClick={() => setIsSidebarOpen(true)}
+          >
+            <MenuIcon />
+          </Button>
+        </div>
+
+        <div className="flex flex-shrink-0 items-center gap-4">
+          <AuthButton />
+        </div>
       </div>
     </nav>
   );

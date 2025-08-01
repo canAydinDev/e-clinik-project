@@ -2,39 +2,58 @@
 
 import { useTRPC } from "@/trpc/client";
 import { useQuery } from "@tanstack/react-query";
-import Image from "next/image";
-import Link from "next/link";
+
+import { patientColumns } from "@/modules/ui/components/table/patient-columns";
+import { AdminPatientDataTable } from "../../table/admin-patient-table";
+import { SearchInput } from "../../search-input";
+
+import { useEffect, useState } from "react";
+import { getCurrentUser } from "@/lib/client/auth";
+import { Models } from "appwrite";
+import { UserPatientDataTable } from "../../table/user-patient-table";
 
 export const PatientsHomePage = () => {
   const trpc = useTRPC();
   const patients = useQuery(trpc.patients.getMany.queryOptions());
 
+  const [user, setUser] = useState<Models.User<Models.Preferences> | null>(
+    null
+  );
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const currentUser = await getCurrentUser();
+      setUser(currentUser);
+    };
+
+    fetchUser();
+  }, []);
+
   return (
-    <section>
+    <div className="ml-5 flex max-w-7xl flex-col space-y-14">
       <div>
-        <h1>Hastalar</h1>
-        {patients.data?.map((patient) => (
-          <div
-            key={patient.name}
-            className="flex gap-2 border border-gray-600 mx-10"
-          >
-            <div>{patient.name || "İsimsiz Hasta"}</div>
-            <div>{patient.email || "İsimsiz Hasta"}</div>
-            {patient.faceUrl && (
-              <div>
-                <Image
-                  src={`${patient?.faceUrl}`}
-                  alt="patient Pic"
-                  height={100}
-                  width={100}
-                  objectFit="cover"
-                />
-              </div>
-            )}
-            <Link href={`/admin/patient/${patient.$id}`}>sayfasi</Link>
-          </div>
-        ))}
+        <h1 className="text-[32px] font-bold md:text-[36px]">
+          {user ? `Hoş geldiniz, ${user.name}` : "Yükleniyor..."}
+        </h1>
       </div>
-    </section>
+
+      <main className="flex flex-row items-center space-y-6 px-[5%] xl:space-y-12 xl:px-12 gap-2">
+        <div className="flex-5 w-full">
+          <SearchInput />
+
+          {user?.name === "admin" ? (
+            <AdminPatientDataTable
+              columns={patientColumns}
+              data={patients.data ?? []}
+            />
+          ) : (
+            <UserPatientDataTable
+              columns={patientColumns}
+              data={patients.data ?? []}
+            />
+          )}
+        </div>
+      </main>
+    </div>
   );
 };

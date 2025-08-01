@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
@@ -5,6 +6,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { logout } from "@/lib/client/auth";
 import Link from "next/link";
 
 interface NavbarItem {
@@ -36,22 +38,6 @@ export const NavbarSidebar = ({ items, open, onOpenChange }: Props) => {
               {item.children}
             </Link>
           ))}
-          <div className="border-t">
-            <Link
-              href="/sign-in"
-              onClick={() => onOpenChange(false)}
-              className="w-full text-left p-4 hover:bg-black hover:text-white flex items-center text-base font-medium"
-            >
-              Giriş Yap
-            </Link>
-            <Link
-              href="/register"
-              onClick={() => onOpenChange(false)}
-              className="w-full text-left p-4 hover:bg-black hover:text-white flex items-center text-base font-medium"
-            >
-              Yeni Kayıt
-            </Link>
-          </div>
         </ScrollArea>
       </SheetContent>
     </Sheet>

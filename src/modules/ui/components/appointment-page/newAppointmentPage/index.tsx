@@ -49,7 +49,7 @@ export const NewAppointmentPage = ({
         <div className="mx-auto flex size-full flex-col py-10 max-w-[860px] flex-1 justify-between">
           <div className="flex items-center justify-center mx-auto my-10 text-2xl">
             <h1>
-              <span className="font-bold">Ş</span>AHINO{" "}
+              <span className="font-bold">Ş</span>AHIN{" "}
               <span className="font-semibold text-green-300">KLINIK</span>
             </h1>
           </div>
@@ -62,7 +62,7 @@ export const NewAppointmentPage = ({
           />
 
           <p className="justify-items-end text-gray-600 xl:text-left">
-            © 2024 ŞahinoKlinik
+            © 2024 ŞahinKlinik
           </p>
         </div>
       </section>

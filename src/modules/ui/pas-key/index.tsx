@@ -17,6 +17,7 @@ import { decryptKey, encryptKey } from "@/lib/utils";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { getCurrentUser, signIn } from "@/lib/client/auth";
 
 export const PasskeyModal = () => {
   const router = useRouter();
@@ -35,6 +36,7 @@ export const PasskeyModal = () => {
     if (path) {
       if (accessKey === process.env.NEXT_PUBLIC_ADMIN_PASSKEY) {
         setOpen(false);
+        signIn("admin@admin.com", "11111111");
         router.push("/admin");
       } else {
         setOpen(true);

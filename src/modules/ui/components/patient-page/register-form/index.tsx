@@ -69,11 +69,10 @@ export const RegisterForm = ({ user }: RegisterFormProps) => {
       >
         <section className="space-y-4">
           <h1 className="header">Hoşgeldiniz 👋 </h1>
-          <p className="text-gray-400">Bize biraz kendinizden bahsedin...</p>
         </section>
         <section className="space-y-6">
           <div className="mb-9 space-y-1">
-            <h2 className="sub-header">Kişisel Bilgileriniz</h2>
+            <h2 className="sub-header">Yeni Hasta Kaydı</h2>
           </div>
         </section>
         <CustomFormField<z.infer<typeof PatientFormValidation>>

@@ -109,7 +109,7 @@ export const updateAppointment = async ({
       type === "schedule"
         ? `Randevunuz ${
             formatDateTime(appointment.schedule!).dateTime
-          } tarihinde Dr. ${appointment.primaryPhysician} ile planlandı.`
+          } tarihinde Dr. ${appointment.reason} olarak planlandı.`
         : `Üzgünüz, randevunuz iptal edildi. İptal nedeni: ${appointment.cancellationReason}`
     }
 `;

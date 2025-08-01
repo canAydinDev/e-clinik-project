@@ -1,12 +1,10 @@
 import { PatientsHomePage } from "@/modules/ui/components/patient-page/patients-home-page";
 
-const Page = () => {
+const Page = async () => {
   return (
-    <section>
-      <div>
-        <PatientsHomePage />
-      </div>
-    </section>
+    <div>
+      <PatientsHomePage />
+    </div>
   );
 };
 

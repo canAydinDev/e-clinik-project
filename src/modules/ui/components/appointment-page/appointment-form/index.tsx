@@ -4,13 +4,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Form } from "@/components/ui/form";
+import { toast } from "sonner";
 
 import { useState } from "react";
 import { getAppointmentSchema } from "@/lib/validation";
 import { useRouter } from "next/navigation";
-import { Doctors } from "@/constants";
-import { SelectItem } from "@/components/ui/select";
-import Image from "next/image";
+
 import {
   createAppointment,
   updateAppointment,
@@ -18,7 +17,7 @@ import {
 import { CustomFormField } from "../../patient-page/custom-form-field";
 import { SubmitButton } from "../../patient-page/submit-button";
 import { FormFieldType } from "../../patient-page/patient-form";
-import { UserFormData } from "../../../../../../types/form";
+import { CreateAppointmentData } from "../../../../../../types/form";
 import { Appointment } from "../../../../../../types/appwrite.types";
 
 interface AppointmentFormProps {
@@ -82,15 +81,15 @@ export const AppointmentForm = ({
         const appointment = await createAppointment(appointmentData);
 
         if (appointment) {
+          toast.success("Randevunuz başarıyla oluşturuldu.");
           form.reset();
-          router.push(
-            `/patients/${userId}/new-appointment/success?appointmentId=${appointment.$id}`
-          );
+
+          router.push(`/patient/${patientId}`);
         }
       } else {
         const appointmentToUpdate = {
           userId,
-          appointmentId: appointment?.$id!,
+          appointmentId: appointment?.$id || "",
           appointment: {
             schedule: new Date(values?.schedule),
             status: status as Status,
@@ -134,14 +133,14 @@ export const AppointmentForm = ({
         {type === "create" && (
           <section>
             <h1 className="header">Yeni Randevu</h1>
-            <p className="text-gray-400">
+            <p className="text-white">
               10 saniyede yeni randevunuzu oluşturun...
             </p>
           </section>
         )}
         {type !== "cancel" && (
           <>
-            <CustomFormField<UserFormData>
+            <CustomFormField<CreateAppointmentData>
               fieldType={FormFieldType.DATE_PICKER}
               control={form.control}
               name="schedule"
@@ -151,7 +150,7 @@ export const AppointmentForm = ({
             />
 
             <div className="flex flex-col gap-6 xl:flex-row">
-              <CustomFormField<UserFormData>
+              <CustomFormField<CreateAppointmentData>
                 fieldType={FormFieldType.TEXTAREA}
                 control={form.control}
                 name="reason"
@@ -159,7 +158,7 @@ export const AppointmentForm = ({
                 placeholder="Randevu talebinizin nedenini yaziniz..."
               />
 
-              <CustomFormField<UserFormData>
+              <CustomFormField<CreateAppointmentData>
                 fieldType={FormFieldType.TEXTAREA}
                 control={form.control}
                 name="note"
@@ -171,7 +170,7 @@ export const AppointmentForm = ({
         )}
 
         {type === "cancel" && (
-          <CustomFormField<UserFormData>
+          <CustomFormField<CreateAppointmentData>
             fieldType={FormFieldType.TEXTAREA}
             control={form.control}
             name="cancellationReason"

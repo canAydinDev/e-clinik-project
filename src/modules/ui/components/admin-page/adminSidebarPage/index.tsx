@@ -36,22 +36,6 @@ export const AdminNavbarSidebar = ({ items, open, onOpenChange }: Props) => {
               {item.children}
             </Link>
           ))}
-          <div className="border-t">
-            <Link
-              href="/sign-in"
-              onClick={() => onOpenChange(false)}
-              className="w-full text-left p-4 hover:bg-black hover:text-white flex items-center text-base font-medium"
-            >
-              Giriş Yap
-            </Link>
-            <Link
-              href="/register"
-              onClick={() => onOpenChange(false)}
-              className="w-full text-left p-4 hover:bg-black hover:text-white flex items-center text-base font-medium"
-            >
-              Yeni Kayıt
-            </Link>
-          </div>
         </ScrollArea>
       </SheetContent>
     </Sheet>

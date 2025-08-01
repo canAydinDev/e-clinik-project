@@ -14,7 +14,7 @@ export default async function Home({ searchParams }: SearchParamProps) {
         <div className="mx-auto flex size-full flex-col py-10 max-w-[496px]">
           <div className="flex items-center justify-center mx-auto my-10 text-2xl">
             <h1>
-              <span className="font-bold">Ş</span>AHINO{" "}
+              <span className="font-bold">Ş</span>AHIN{" "}
               <span className="font-semibold text-green-300">KLINIK</span>
             </h1>
           </div>
@@ -22,7 +22,7 @@ export default async function Home({ searchParams }: SearchParamProps) {
 
           <div className="text-14-regular mt-20 flex justify-between">
             <p className="justify-items-end text-gray-600 xl:text-left">
-              © 2024 ŞahinoKlinik
+              © 2024 ŞahinKlinik
             </p>
             <Link href="/?admin=true" className="text-green-600">
               Yönetim Paneli

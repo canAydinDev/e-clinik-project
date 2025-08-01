@@ -102,3 +102,23 @@ export function getAppointmentSchema(type: string) {
       return ScheduleAppointmentSchema;
   }
 }
+
+export const ExaminationFormValidation = z.object({
+  patientId: z.string().min(1, "Hasta bilgisi eksik"),
+  procedure: z
+    .string()
+    .min(2, "İşlem adı en az 2 karakter olmalıdır")
+    .max(100, "İşlem adı en fazla 100 karakter olabilir"),
+  date: z.coerce
+    .date({
+      required_error: "Tarih bilgisi gereklidir",
+      invalid_type_error: "Geçerli bir tarih giriniz",
+    })
+    .default(() => new Date()),
+  doctorNote: z.string().optional(),
+  nextControlDate: z.coerce.date().optional(),
+
+  // 🔥 Birden fazla dosya destekler
+  photoBefore: z.custom<File[]>().optional(),
+  photoAfter: z.custom<File[]>().optional(),
+});

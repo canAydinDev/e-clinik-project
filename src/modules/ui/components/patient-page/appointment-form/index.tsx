@@ -10,14 +10,12 @@ import { SubmitButton } from "../submit-button";
 import { useState } from "react";
 import { getAppointmentSchema, UserFormValidation } from "@/lib/validation";
 import { useRouter } from "next/navigation";
-import { Doctors } from "@/constants";
-import { SelectItem } from "@/components/ui/select";
-import Image from "next/image";
+
 import {
   createAppointment,
   updateAppointment,
 } from "@/lib/actions/appointment.actions";
-import { Appointment } from "../../../../../../../types/appwrite.types";
+import { Appointment } from "../../../../../../types/appwrite.types";
 
 export enum FormFieldType {
   INPUT = "input",
@@ -52,7 +50,6 @@ export const AppointmentForm = ({
   const form = useForm<z.infer<typeof AppointmentFormValidation>>({
     resolver: zodResolver(AppointmentFormValidation),
     defaultValues: {
-      primaryPhysician: appointment ? appointment.primaryPhysician : "",
       schedule: appointment ? new Date(appointment.schedule) : new Date(),
       reason: appointment ? appointment.reason : "",
       note: appointment?.note || "",
@@ -81,7 +78,7 @@ export const AppointmentForm = ({
         const appointmentData = {
           userId,
           patient: patientId,
-          primaryPhysician: values.primaryPhysician,
+
           schedule: new Date(values.schedule),
           reason: values.reason!,
           note: values.note,
@@ -101,7 +98,6 @@ export const AppointmentForm = ({
           userId,
           appointmentId: appointment?.$id!,
           appointment: {
-            primaryPhysician: values?.primaryPhysicial,
             schedule: new Date(values?.schedule),
             status: status as Status,
             cancellationReason: values?.cancellationReason,
@@ -151,30 +147,7 @@ export const AppointmentForm = ({
         )}
         {type !== "cancel" && (
           <>
-            <CustomFormField<z.infer<typeof UserFormValidation>>
-              fieldType={FormFieldType.SELECT}
-              control={form.control}
-              name="primaryPhysician"
-              label="Doktorunuz"
-              placeholder="Bir doktor seciniz..."
-            >
-              {Doctors.map((doctor) => (
-                <SelectItem key={doctor.name} value={doctor.name}>
-                  <div className="flex items-center cursor-pointer gap-2">
-                    <Image
-                      src={doctor.image}
-                      width={32}
-                      height={32}
-                      alt={doctor.name}
-                      className="rounded-full border border-gray-700"
-                    />
-                    <p>{doctor.name}</p>
-                  </div>
-                </SelectItem>
-              ))}
-            </CustomFormField>
-
-            <CustomFormField<z.infer<typeof UserFormValidation>>
+            <CustomFormField<z.infer<typeof AppointmentFormValidation>>
               fieldType={FormFieldType.DATE_PICKER}
               control={form.control}
               name="schedule"
@@ -184,7 +157,7 @@ export const AppointmentForm = ({
             />
 
             <div className="flex flex-col gap-6 xl:flex-row">
-              <CustomFormField<z.infer<typeof UserFormValidation>>
+              <CustomFormField<z.infer<typeof AppointmentFormValidation>>
                 fieldType={FormFieldType.TEXTAREA}
                 control={form.control}
                 name="reason"
@@ -192,7 +165,7 @@ export const AppointmentForm = ({
                 placeholder="Randevu talebinizin nedenini yaziniz..."
               />
 
-              <CustomFormField<z.infer<typeof UserFormValidation>>
+              <CustomFormField<z.infer<typeof AppointmentFormValidation>>
                 fieldType={FormFieldType.TEXTAREA}
                 control={form.control}
                 name="note"
@@ -204,7 +177,7 @@ export const AppointmentForm = ({
         )}
 
         {type === "cancel" && (
-          <CustomFormField<z.infer<typeof UserFormValidation>>
+          <CustomFormField<z.infer<typeof AppointmentFormValidation>>
             fieldType={FormFieldType.TEXTAREA}
             control={form.control}
             name="cancellationReason"

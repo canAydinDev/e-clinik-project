@@ -7,8 +7,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { useState } from "react";
-import { MenuIcon } from "lucide-react";
+import { MenuIcon, Settings } from "lucide-react";
 import { AdminNavbarSidebar } from "../adminSidebarPage";
+import { AuthButton } from "../../auth/auth-button";
 
 const playFair = Playfair_Display({
   subsets: ["latin"],
@@ -35,18 +36,19 @@ const NavbarItem = ({ href, children, isActive }: NavbarItemProps) => {
     </Button>
   );
 };
-
+const userId = "6883b29700098b661379";
 const navbarItems = [
   { href: "/admin/patients", children: "Hastalar" },
+
   { href: "/admin/appointments", children: "Randevular" },
-  { href: "/admin/users", children: "Kullanici Islemleri" },
+  { href: `/admin/patients/${userId}/register`, children: "Yeni Kayıt" },
 ];
 
 export const AdminNavbar = () => {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   return (
-    <nav className="h-20 flex border-b justify-between font-medium bg-white ">
+    <nav className="h-20 flex  justify-between font-medium mx-5 border-b">
       <Link href="/admin" className="pl-6 my-auto flex items-center">
         <span
           className={cn(
@@ -54,7 +56,7 @@ export const AdminNavbar = () => {
             playFair.className
           )}
         >
-          Admin
+          Yönetim Paneli
         </span>
       </Link>
       <AdminNavbarSidebar
@@ -63,7 +65,7 @@ export const AdminNavbar = () => {
         items={navbarItems}
       />
 
-      <div className="items-center gap-4 hidden lg:flex mr-8 ">
+      <div className="items-center gap-4 hidden lg:flex mr-5 ">
         {navbarItems.map((item) => (
           <NavbarItem
             key={item.href}
@@ -83,6 +85,13 @@ export const AdminNavbar = () => {
         >
           <MenuIcon />
         </Button>
+      </div>
+
+      <div className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-primary transition">
+        <AuthButton />
+        <Link href="/admin/users">
+          <Settings size={30} />
+        </Link>
       </div>
     </nav>
   );
