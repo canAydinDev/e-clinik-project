@@ -45,3 +45,12 @@ export type CreateUserParams = {
 export type User = CreateUserParams & {
   $id: string;
 };
+
+export type Examination = {
+  $id: string;
+  patient: string; // ilişkilendirilmiş hasta ID'si
+  procedure: string;
+  date: string; // ISO formatlı tarih
+  doctorNote?: string;
+  nextControlDate?: string;
+};

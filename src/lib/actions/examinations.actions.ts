@@ -38,6 +38,20 @@ export const createExamination = async (examinationData: {
     return null;
   }
 };
+export const getExaminationByExamId = async (examinationId: string) => {
+  try {
+    const result = await databases.getDocument(
+      DATABASE_ID!,
+      EXAMINATION_COLLECTION_ID!,
+      examinationId
+    );
+
+    return parseStringify(result);
+  } catch (error) {
+    console.error("Muayene ID ile getirilirken hata:", error);
+    return null;
+  }
+};
 
 // 2. Muayene güncelleme
 export const updateExamination = async (
