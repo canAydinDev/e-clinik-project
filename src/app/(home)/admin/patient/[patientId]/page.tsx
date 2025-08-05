@@ -5,11 +5,11 @@ import Image from "next/image";
 import Link from "next/link";
 
 interface PatientProps {
-  params: Promise<{ patientId: string }>;
+  params: { patientId: string };
 }
 
 const Patient = async ({ params }: PatientProps) => {
-  const { patientId } = await params;
+  const { patientId } = params;
   const patient = await getPatientById(patientId);
 
   if (!patient) {
@@ -17,10 +17,15 @@ const Patient = async ({ params }: PatientProps) => {
   }
 
   return (
-    <div className="flex flex-col justify-between mx-4 mt-4 border p-3">
+    <div className="flex flex-col justify-between mx-4 mt-4  p-3">
       <div className="flex flex-row justify-between items-center mb-5 mx-5 ">
         <div>
-          <h1 className="font-bold text-xl">{patient.name}</h1>
+          <Link
+            className="font-bold text-xl"
+            href={`/admin/patient/${patientId}`}
+          >
+            {patient.name}
+          </Link>
         </div>
         <div>
           {patient.faceUrl ? (
@@ -37,11 +42,11 @@ const Patient = async ({ params }: PatientProps) => {
           )}
         </div>
       </div>
-      <div className="flex flex-row justify-between items-center">
-        <div className="flex w-[80%] ">
+      <div className="flex flex-col lg:flex-row justify-start items-start">
+        <div className="flex flex-[2]">
           <ExaminationHomePage patientId={patientId} />
         </div>
-        <div className="flex flex-col gap-2 items-center w-[10%]">
+        <div className="flex flex-[1] flex-col gap-2 items-start mt-5  ">
           <div>
             <Button asChild variant="elevated">
               <Link href={`/admin/examinations/${patientId}/newexamination`}>

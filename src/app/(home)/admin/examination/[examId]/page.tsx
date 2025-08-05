@@ -3,6 +3,7 @@ import { getExaminationByExamId } from "@/lib/actions/examinations.actions";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { DeleteExaminationButton } from "@/modules/ui/components/admin-page/examination-page/delete-examination";
 
 interface PageProp {
   params: { examId: string };
@@ -19,7 +20,7 @@ const Page = async ({ params }: PageProp) => {
   }
 
   return (
-    <div className="p-6 ">
+    <div className="p-6  min-h-screen">
       <div className="flex flex-row justify-between items-center mb-5 mx-5 ">
         <div>
           <Link
@@ -45,20 +46,27 @@ const Page = async ({ params }: PageProp) => {
         </div>
       </div>
 
-      <div className="flex flex-row gap-4 mx-auto">
-        <div className="flex border min-h-[200px] w-[30%] p-4 flex-col items-center">
+      <div className="flex flex-col md:flex-row gap-4 mx-auto">
+        <div className="flex rounded-xl border  min-h-[200px] w-[30%] p-4 flex-col items-center">
           <h2 className="font-semibold text-lg">Islem</h2>
           <p>{exam.procedure}</p>
         </div>
 
-        <div className="flex border min-h-[200px] w-[30%] p-4 flex-col items-center">
+        <div className="flex rounded-xl border  min-h-[200px] w-[30%] p-4 flex-col items-center">
           <h2 className="font-semibold text-lg">Not</h2>
           <p>{exam.doctorNote}</p>
         </div>
 
         <div className="flex flex-col gap-2 m-2">
-          <Button variant="elevated">Muayeneyi Duzenle</Button>
-          <Button variant="elevated">Muayeneyi Sil</Button>
+          <Button asChild variant="greenElevated">
+            <Link href={`/admin/examination/${examId}/edit`}>
+              Muayeneyi Duzenle
+            </Link>
+          </Button>
+          <DeleteExaminationButton
+            examinationId={examId}
+            redirectTo={`/admin/patient/${patient.$id}`}
+          />
         </div>
       </div>
     </div>

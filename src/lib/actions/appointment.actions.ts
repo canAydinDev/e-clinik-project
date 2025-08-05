@@ -8,10 +8,9 @@ import {
   APPOINTMENT_COLLECTION_ID,
 } from "@/lib/server/appwrite";
 
-import { formatDateTime, parseStringify } from "../utils";
+import { parseStringify } from "../utils";
 import { Appointment } from "../../../types/appwrite.types";
 import { revalidatePath } from "next/cache";
-import { messaging } from "../appwrite.config";
 
 export const createAppointment = async (
   appointment: CreateAppointmentParams
@@ -103,35 +102,8 @@ export const updateAppointment = async ({
       throw new Error("Randevu bulunamadi");
     }
 
-    const SmsMessage = `
-    BizimKlinikten Merhabalar
-    ${
-      type === "schedule"
-        ? `Randevunuz ${
-            formatDateTime(appointment.schedule!).dateTime
-          } tarihinde Dr. ${appointment.reason} olarak planlandı.`
-        : `Üzgünüz, randevunuz iptal edildi. İptal nedeni: ${appointment.cancellationReason}`
-    }
-`;
-
-    await sendSMSNotification(userId, SmsMessage);
-
     revalidatePath("/admin");
     return parseStringify(updateAppointment);
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-export const sendSMSNotification = async (userId: string, content: string) => {
-  try {
-    const message = await messaging.createSms(
-      ID.unique(),
-      content,
-      [],
-      [userId]
-    );
-    return parseStringify(message);
   } catch (error) {
     console.log(error);
   }

@@ -19,8 +19,8 @@ export const ExaminationHomePage = ({
   );
 
   return (
-    <div className="ml-5 flex max-w-7xl flex-col space-y-14">
-      <main className="flex flex-row items-center space-y-6 px-[5%] xl:space-y-12 xl:px-12 gap-2">
+    <div className="w-full ml-5 flex max-w-7xl flex-col space-y-14">
+      <main className="w-full flex flex-row items-center space-y-6 px-[5%] xl:space-y-12 xl:px-12 gap-2">
         <div className="flex-5 w-full">
           <ExaminationDataTable
             columns={examinationColumns}

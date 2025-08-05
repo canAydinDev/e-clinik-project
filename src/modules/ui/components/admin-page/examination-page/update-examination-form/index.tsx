@@ -7,7 +7,7 @@ import { Form } from "@/components/ui/form";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createExamination } from "@/lib/actions/examinations.actions";
+import { updateExamination } from "@/lib/actions/examinations.actions";
 import { CustomFormField } from "../../../patient-page/custom-form-field";
 import { FormFieldType } from "../../../patient-page/patient-form";
 import { SubmitButton } from "../../../patient-page/submit-button";
@@ -19,52 +19,56 @@ const ExaminationFormSchema = z.object({
   nextControlDate: z.date().optional(),
 });
 
-interface ExaminationFormProps {
-  patientId: string;
-  setOpen: (open: boolean) => void;
+interface EditExaminationFormProps {
+  examinationId: string;
+  initialValues: {
+    procedure: string;
+    doctorNote?: string;
+    date?: string;
+    nextControlDate?: string;
+  };
+  onSuccess?: () => void;
 }
 
-export const ExaminationForm = ({
-  patientId,
-  setOpen,
-}: ExaminationFormProps) => {
+export const EditExaminationForm = ({
+  examinationId,
+  initialValues,
+  onSuccess,
+}: EditExaminationFormProps) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof ExaminationFormSchema>>({
     resolver: zodResolver(ExaminationFormSchema),
     defaultValues: {
-      procedure: "",
-      doctorNote: "",
-      date: new Date(),
-      nextControlDate: undefined,
+      procedure: initialValues.procedure,
+      doctorNote: initialValues.doctorNote || "",
+      date: initialValues.date ? new Date(initialValues.date) : new Date(),
+      nextControlDate: initialValues.nextControlDate
+        ? new Date(initialValues.nextControlDate)
+        : undefined,
     },
   });
 
   const onSubmit = async (values: z.infer<typeof ExaminationFormSchema>) => {
     setIsLoading(true);
     try {
-      const examinationData = {
-        patientId,
+      const result = await updateExamination(examinationId, {
         procedure: values.procedure,
         doctorNote: values.doctorNote,
         date: values.date,
         nextControlDate: values.nextControlDate,
-      };
+      });
 
-      const result = await createExamination(examinationData);
-
-      if (result) {
-        toast.success("Muayene başarıyla oluşturuldu.");
-        form.reset();
-        setOpen(false);
-
-        router.push(`/admin/patient/${patientId}`);
+      if (result?.$id) {
+        toast.success("Muayene başarıyla güncellendi.");
+        onSuccess?.();
+        router.push(`/admin/examination/${result.$id}`);
         router.refresh();
       }
     } catch (error) {
       console.error(error);
-      toast.error("Bir hata oluştu.");
+      toast.error("Güncelleme sırasında hata oluştu.");
     } finally {
       setIsLoading(false);
     }
@@ -74,8 +78,10 @@ export const ExaminationForm = ({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <section>
-          <h1 className="text-2xl font-bold">Yeni Muayene</h1>
-          <p className="text-sm text-gray-600">Muayene bilgilerini giriniz.</p>
+          <h1 className="text-2xl font-bold">Muayene Güncelle</h1>
+          <p className="text-sm text-gray-600">
+            Muayene bilgilerini güncelleyin.
+          </p>
         </section>
 
         <CustomFormField
@@ -113,7 +119,7 @@ export const ExaminationForm = ({
         />
 
         <SubmitButton isLoading={isLoading} className="shad-primary-btn w-full">
-          Muayene Kaydet
+          Güncellemeyi Kaydet
         </SubmitButton>
       </form>
     </Form>

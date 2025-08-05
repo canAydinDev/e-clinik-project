@@ -84,7 +84,11 @@ export const AppointmentForm = ({
           toast.success("Randevunuz başarıyla oluşturuldu.");
           form.reset();
 
-          router.push(`/patient/${patientId}`);
+          if ((userId = "6883b29700098b661379")) {
+            router.push(`/admin/patient/${patientId}`);
+          } else {
+            router.push(`/dashboard/patient/${patientId}`);
+          }
         }
       } else {
         const appointmentToUpdate = {
