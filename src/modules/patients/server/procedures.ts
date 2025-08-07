@@ -1,14 +1,7 @@
 import {
   DATABASE_ID,
   PATIENT_COLLECTION_ID,
-  PROJECT_ID,
-  NEXT_PUBLIC_BUCKET_ID,
-  NEXT_PUBLIC_ENDPOINT,
   databases,
-  storage,
-  users,
-  ID,
-  Query,
 } from "@/lib/server/appwrite"; // ← InputFile kaldırıldı
 import { parseStringify } from "@/lib/utils";
 

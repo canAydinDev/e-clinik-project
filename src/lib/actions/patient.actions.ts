@@ -7,7 +7,6 @@ import {
   NEXT_PUBLIC_BUCKET_ID,
   NEXT_PUBLIC_ENDPOINT,
   databases,
-  storage,
   users,
   ID,
   Query,
@@ -15,7 +14,7 @@ import {
 
 import { API_KEY } from "../appwrite.config";
 import { parseStringify } from "../utils";
-import { Users, Client, Account } from "node-appwrite";
+import { Users, Client } from "node-appwrite";
 
 export const createUser = async (user: CreateUserParams) => {
   try {
