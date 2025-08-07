@@ -4,7 +4,7 @@ interface PageProps {
   params: { patientId: string };
 }
 
-const Patient = ({ params }: PageProps) => {
+const Patient = async ({ params }: PageProps) => {
   const { patientId } = params;
 
   return (
