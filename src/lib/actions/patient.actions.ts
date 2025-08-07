@@ -27,8 +27,7 @@ export const createUser = async (user: CreateUserParams) => {
     );
     return newUser;
   } catch (error) {
-    console.log(error)
-  }
+    console.log(error);
   }
 };
 
