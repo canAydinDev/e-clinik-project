@@ -1,11 +1,11 @@
 import { AppointmentPage } from "@/modules/ui/components/appointment-page/appointmentHomePage";
 
 interface PatientProps {
-  params: Promise<{ patientId: string }>;
+  params: { patientId: string };
 }
 
 const Patient = async ({ params }: PatientProps) => {
-  const { patientId } = await params;
+  const { patientId } = params;
 
   return (
     <div>
