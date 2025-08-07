@@ -3,14 +3,18 @@ import { PasskeyModal } from "@/modules/ui/pas-key";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function Home({ searchParams }: SearchParamProps) {
+interface PageProps {
+  searchParams?: { [key: string]: string | string[] | undefined };
+}
+
+export default function Home({ searchParams }: PageProps) {
   const isAdmin = searchParams?.admin === "true";
 
   return (
     <div className="flex h-screen max-h-screen">
       {isAdmin && <PasskeyModal />}
 
-      <section className=" container my-auto">
+      <section className="container my-auto">
         <div className="mx-auto flex size-full flex-col py-10 max-w-[496px]">
           <div className="flex items-center justify-center mx-auto my-10 text-2xl">
             <h1>
