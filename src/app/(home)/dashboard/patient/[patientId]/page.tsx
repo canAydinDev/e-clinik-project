@@ -3,11 +3,11 @@ import { getPatientById } from "@/lib/actions/patient.actions";
 import Image from "next/image";
 import Link from "next/link";
 
-interface PatientProps {
+interface PageProps {
   params: { patientId: string };
 }
 
-const Patient = async ({ params }: PatientProps) => {
+const Patient = async ({ params }: PageProps) => {
   const { patientId } = params;
   const patient = await getPatientById(patientId);
 

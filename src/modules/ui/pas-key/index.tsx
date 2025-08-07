@@ -17,7 +17,7 @@ import { decryptKey, encryptKey } from "@/lib/utils";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { getCurrentUser, signIn } from "@/lib/client/auth";
+import { signIn } from "@/lib/client/auth";
 
 export const PasskeyModal = () => {
   const router = useRouter();

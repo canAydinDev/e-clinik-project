@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
@@ -6,7 +5,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { logout } from "@/lib/client/auth";
 import Link from "next/link";
 
 interface NavbarItem {

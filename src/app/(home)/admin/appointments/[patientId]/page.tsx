@@ -1,10 +1,10 @@
 import { AppointmentPage } from "@/modules/ui/components/appointment-page/appointmentHomePage";
 
-interface PatientProps {
+interface PageProps {
   params: { patientId: string };
 }
 
-const Patient = async ({ params }: PatientProps) => {
+const Patient = ({ params }: PageProps) => {
   const { patientId } = params;
 
   return (
