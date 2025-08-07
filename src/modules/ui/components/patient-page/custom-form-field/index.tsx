@@ -3,6 +3,7 @@
 import "react-phone-number-input/style.css";
 import PhoneInput from "react-phone-number-input";
 import { E164Number } from "libphonenumber-js";
+import { tr } from "date-fns/locale";
 
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -112,9 +113,10 @@ const RenderField = <T extends FieldValues>({
             <DatePicker
               selected={field.value}
               onChange={(date) => field.onChange(date)}
-              dateFormat={dateFormat ?? "MM/dd/yyyy"}
+              dateFormat={dateFormat ?? "dd/MM/yyyy"}
               showTimeSelect={showTimeSelect ?? false}
-              timeInputLabel="Time:"
+              timeInputLabel="Saat:"
+              locale={tr}
               className="w-full h-full text-14-medium outline-none border-none"
             />
           </FormControl>

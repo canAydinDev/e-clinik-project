@@ -44,13 +44,12 @@ export const PatientForm = () => {
     phone,
     password,
   }: z.infer<typeof UserFormValidation>) {
-    console.log("tikliyor");
     try {
       setIsLoading(true);
       const userData = { name, email, phone, password };
       const user = await createUser(userData);
       if (user) {
-        router.push(`/patients/${user.$id}/register`);
+        router.push(`/admin/patients/${user.$id}/register`);
       }
     } catch (error) {
       console.error(error);
