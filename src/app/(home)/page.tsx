@@ -3,12 +3,14 @@ import { PasskeyModal } from "@/modules/ui/pas-key";
 import Image from "next/image";
 import Link from "next/link";
 
+// Temel beklenti: searchParams bir Promise döndürür
 interface PageProps {
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams?: Promise<{ admin?: string }>;
 }
 
-export default function Home({ searchParams }: PageProps) {
-  const isAdmin = searchParams?.admin === "true";
+const Home = async ({ searchParams }: PageProps) => {
+  const params = await searchParams;
+  const isAdmin = params?.admin === "true";
 
   return (
     <div className="flex h-screen max-h-screen">
@@ -43,4 +45,6 @@ export default function Home({ searchParams }: PageProps) {
       />
     </div>
   );
-}
+};
+
+export default Home;
