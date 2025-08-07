@@ -8,6 +8,18 @@ import { formatDateTime } from "@/lib/utils";
 import { AppointmentModal } from "../appointment-model";
 import { Appointment } from "../../../../../../types/appwrite.types";
 
+import { format } from "date-fns";
+import { tr } from "date-fns/locale";
+
+export const formatMyDateTime = (dateString: string | Date) => {
+  const date = new Date(dateString);
+  return {
+    dateTime: format(date, "dd MMMM yyyy HH:mm", { locale: tr }),
+    dateOnly: format(date, "dd MMMM yyyy", { locale: tr }),
+    timeOnly: format(date, "HH:mm", { locale: tr }),
+  };
+};
+
 export const columns: ColumnDef<Appointment>[] = [
   {
     header: "ID",
@@ -39,7 +51,7 @@ export const columns: ColumnDef<Appointment>[] = [
     header: "Tarih",
     cell: ({ row }) => (
       <p className="text-14-regular min-w-[100px]">
-        {row.original.schedule.getDate()}
+        {formatMyDateTime(row.original.schedule).dateTime}
       </p>
     ),
   },
