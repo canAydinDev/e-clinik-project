@@ -14,7 +14,7 @@ import {
 
 import { API_KEY } from "../appwrite.config";
 import { parseStringify } from "../utils";
-import { Users, Client, AppwriteException } from "node-appwrite";
+import { Users, Client } from "node-appwrite";
 
 export const createUser = async (user: CreateUserParams) => {
   try {
@@ -27,12 +27,7 @@ export const createUser = async (user: CreateUserParams) => {
     );
     return newUser;
   } catch (error) {
-    const err = error as AppwriteException; // ✅ Tip dönüşümü
-    if (err.code === 409) {
-      const document = await users.list([Query.equal("email", [user.email])]);
-      return document?.users[0];
-    }
-    throw error;
+    console.log(error)
   }
   }
 };
