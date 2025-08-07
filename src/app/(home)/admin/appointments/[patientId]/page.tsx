@@ -1,10 +1,11 @@
+// ✅ Burası server component olarak tanımlı
 import { AppointmentPage } from "@/modules/ui/components/appointment-page/appointmentHomePage";
 
 interface PageProps {
   params: { patientId: string };
 }
 
-const Patient = async ({ params }: PageProps) => {
+const Page = async ({ params }: PageProps) => {
   const { patientId } = params;
 
   return (
@@ -14,4 +15,4 @@ const Patient = async ({ params }: PageProps) => {
   );
 };
 
-export default Patient;
+export default Page;
