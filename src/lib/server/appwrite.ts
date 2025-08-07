@@ -1,12 +1,4 @@
-import {
-  Client,
-  Users,
-  Databases,
-  Storage,
-  ID,
-  Query,
-  InputFile,
-} from "node-appwrite";
+import { Client, Users, Databases, Storage, ID, Query } from "node-appwrite";
 
 export const {
   PROJECT_ID,
@@ -28,4 +20,4 @@ const users = new Users(client);
 const databases = new Databases(client);
 const storage = new Storage(client);
 
-export { client, users, databases, storage, ID, Query, InputFile };
+export { client, users, databases, storage, ID, Query };
