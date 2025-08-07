@@ -43,6 +43,10 @@ export const PatientFormValidation = z.object({
     .string()
     .min(5, "Adres en az 5 karakter olmalıdır")
     .max(500, "Adres en fazla 500 karakter olabilir"),
+  allergies: z
+    .string()
+    .min(5, "Adres en az 5 karakter olmalıdır")
+    .max(500, "Adres en fazla 500 karakter olabilir"),
   occupation: z
     .string()
     .min(2, "Meslek en az 2 karakter olmalıdır")
