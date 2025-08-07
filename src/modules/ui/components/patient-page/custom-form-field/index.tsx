@@ -136,9 +136,10 @@ const RenderField = <T extends FieldValues>({
             <DatePicker
               selected={field.value}
               onChange={(date) => field.onChange(date)}
-              dateFormat={dateFormat ?? "MM/dd/yyyy"}
+              dateFormat={"dd/MM/yyyy"}
               showTimeSelect={showTimeSelect ?? false}
-              timeInputLabel="Time:"
+              timeInputLabel="Saat:"
+              locale={tr}
               wrapperClassName="overflow-hidden border-transparent w-full placeholder:text-gray-600   h-11 text-14-medium rounded-md px-3 outline-none  "
             />
           </FormControl>
