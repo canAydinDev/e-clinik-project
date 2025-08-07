@@ -4,11 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 
 interface PageProps {
-  params: { patientId: string };
+  params: Promise<{ patientId: string }>;
 }
 
 const Patient = async ({ params }: PageProps) => {
-  const { patientId } = params;
+  const { patientId } = await params;
   const patient = await getPatientById(patientId);
 
   if (!patient) {

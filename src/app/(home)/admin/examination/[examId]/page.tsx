@@ -6,11 +6,11 @@ import Link from "next/link";
 import { DeleteExaminationButton } from "@/modules/ui/components/admin-page/examination-page/delete-examination";
 
 interface PageProp {
-  params: { examId: string };
+  params: Promise<{ examId: string }>;
 }
 
 const Page = async ({ params }: PageProp) => {
-  const { examId } = params;
+  const { examId } = await params;
 
   const exam = await getExaminationByExamId(examId);
   const patient = exam.patientId;

@@ -2,11 +2,11 @@ import { getUser } from "@/lib/actions/patient.actions";
 import { RegisterForm } from "@/modules/ui/components/patient-page/register-form";
 
 interface RegisterProps {
-  params: { userId: string };
+  params: Promise<{ userId: string }>;
 }
 
 const Register = async ({ params }: RegisterProps) => {
-  const { userId } = params;
+  const { userId } = await params;
   const user = await getUser(userId);
   return (
     <div className="mx-10">

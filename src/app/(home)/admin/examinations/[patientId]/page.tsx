@@ -3,11 +3,11 @@ import { ExaminationHomePage } from "@/modules/ui/components/admin-page/examinat
 import Image from "next/image";
 
 interface PageProps {
-  params: { patientId: string };
+  params: Promise<{ patientId: string }>;
 }
 
 const Page = async ({ params }: PageProps) => {
-  const { patientId } = params;
+  const { patientId } = await params;
 
   const patient = await getPatientById(patientId);
 
