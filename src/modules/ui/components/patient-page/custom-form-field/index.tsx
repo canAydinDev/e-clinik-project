@@ -58,7 +58,7 @@ const RenderField = <T extends FieldValues>({
     iconAlt,
     placeholder,
     showTimeSelect,
-    dateFormat,
+
     renderSkeleton,
   } = props;
 
@@ -110,29 +110,6 @@ const RenderField = <T extends FieldValues>({
             className="mr-2"
           />
           <FormControl className="w-full">
-            <DatePicker
-              selected={field.value}
-              onChange={(date) => field.onChange(date)}
-              dateFormat={dateFormat ?? "dd/MM/yyyy"}
-              showTimeSelect={showTimeSelect ?? false}
-              timeInputLabel="Saat:"
-              locale={tr}
-              className="w-full h-full text-14-medium outline-none border-none"
-            />
-          </FormControl>
-        </div>
-      );
-
-      return (
-        <div className="flex  rounded-md border border-gray-600  ">
-          <Image
-            src="/assets/icons/calendar.svg"
-            height={24}
-            width={24}
-            alt="takvim"
-            className="ml-2"
-          />
-          <FormControl>
             <DatePicker
               selected={field.value}
               onChange={(date) => field.onChange(date)}
