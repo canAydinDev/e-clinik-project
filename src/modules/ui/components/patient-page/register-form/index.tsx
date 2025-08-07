@@ -36,16 +36,19 @@ export const RegisterForm = ({ user }: RegisterFormProps) => {
   async function onSubmit(values: z.infer<typeof PatientFormValidation>) {
     setIsLoading(true);
 
-    let formData;
-    if (values.face && values.face.length > 0) {
-      const blobFile = new Blob([values.face[0]], {
-        type: values.face[0].type,
+    let formData: FormData | undefined;
+
+    const faceFile = values.face?.[0]; // 👈 Daha güvenli
+    if (faceFile) {
+      const blobFile = new Blob([faceFile], {
+        type: faceFile.type,
       });
 
       formData = new FormData();
       formData.append("blobFile", blobFile);
-      formData.append("fileName", values.face[0].name);
+      formData.append("fileName", faceFile.name);
     }
+
     try {
       const patientData = {
         ...values,
