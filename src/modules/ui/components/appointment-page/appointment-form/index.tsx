@@ -17,7 +17,7 @@ import {
 import { CustomFormField } from "../../patient-page/custom-form-field";
 import { SubmitButton } from "../../patient-page/submit-button";
 import { FormFieldType } from "../../patient-page/patient-form";
-import { CreateAppointmentData } from "../../../../../../types/form";
+import { AppointmentFormData } from "../../../../../../types/form";
 import { Appointment } from "../../../../../../types/appwrite.types";
 
 interface AppointmentFormProps {
@@ -44,9 +44,9 @@ export const AppointmentForm = ({
     resolver: zodResolver(AppointmentFormValidation),
     defaultValues: {
       schedule: appointment ? new Date(appointment.schedule) : new Date(),
-      reason: appointment ? appointment.reason : "",
-      note: appointment?.note || "",
-      cancellationReason: appointment?.cancellationReason || "",
+      reason: appointment?.reason ?? "",
+      note: appointment?.note ?? "",
+      cancellationReason: appointment?.cancellationReason ?? "",
     },
   });
 
@@ -144,7 +144,7 @@ export const AppointmentForm = ({
         )}
         {type !== "cancel" && (
           <>
-            <CustomFormField<CreateAppointmentData>
+            <CustomFormField<AppointmentFormData>
               fieldType={FormFieldType.DATE_PICKER}
               control={form.control}
               name="schedule"
@@ -154,7 +154,7 @@ export const AppointmentForm = ({
             />
 
             <div className="flex flex-col gap-6 xl:flex-row">
-              <CustomFormField<CreateAppointmentData>
+              <CustomFormField<AppointmentFormData>
                 fieldType={FormFieldType.TEXTAREA}
                 control={form.control}
                 name="reason"
@@ -162,7 +162,7 @@ export const AppointmentForm = ({
                 placeholder="Randevu talebinizin nedenini yaziniz..."
               />
 
-              <CustomFormField<CreateAppointmentData>
+              <CustomFormField<AppointmentFormData>
                 fieldType={FormFieldType.TEXTAREA}
                 control={form.control}
                 name="note"
@@ -174,7 +174,7 @@ export const AppointmentForm = ({
         )}
 
         {type === "cancel" && (
-          <CustomFormField<CreateAppointmentData>
+          <CustomFormField<AppointmentFormData>
             fieldType={FormFieldType.TEXTAREA}
             control={form.control}
             name="cancellationReason"

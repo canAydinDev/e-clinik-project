@@ -7,6 +7,14 @@ import {
   CancelAppointmentSchema,
 } from "@/lib/validation"; // ← gerçek import yoluna göre ayarla
 
+import { getAppointmentSchema } from "@/lib/validation";
+
+export const AppointmentFormSchema = getAppointmentSchema("create"); // default
+
+export type AppointmentFormData = z.infer<
+  ReturnType<typeof getAppointmentSchema>
+>;
+
 export type UserFormData = z.infer<typeof UserFormValidation>;
 
 export type PatientFormData = z.infer<typeof PatientFormValidation>;
