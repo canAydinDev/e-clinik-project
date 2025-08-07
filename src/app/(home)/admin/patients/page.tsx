@@ -1,9 +1,9 @@
-import { PatientsHomePage } from "@/modules/ui/components/patient-page/patients-home-page";
+import { AdminPatientsHomePage } from "@/modules/ui/components/patient-page/admin-patients-home-page";
 
 const Page = async () => {
   return (
     <div>
-      <PatientsHomePage />
+      <AdminPatientsHomePage />
     </div>
   );
 };
