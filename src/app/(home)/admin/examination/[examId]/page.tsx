@@ -47,12 +47,12 @@ const Page = async ({ params }: PageProp) => {
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 mx-auto">
-        <div className="flex rounded-xl border  min-h-[200px] w-[30%] p-4 flex-col items-center">
+        <div className="flex w-full md:w-[30%] rounded-xl border  min-h-[200px]  p-4 flex-col items-center">
           <h2 className="font-semibold text-lg">Islem</h2>
           <p>{exam.procedure}</p>
         </div>
 
-        <div className="flex rounded-xl border  min-h-[200px] w-[30%] p-4 flex-col items-center">
+        <div className="flex w-full md:w-[30%] rounded-xl border  min-h-[200px] p-4 flex-col items-center">
           <h2 className="font-semibold text-lg">Not</h2>
           <p>{exam.doctorNote}</p>
         </div>

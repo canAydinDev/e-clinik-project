@@ -16,7 +16,7 @@ const Home = async ({ searchParams }: PageProps) => {
     <div className="flex h-screen max-h-screen">
       {isAdmin && <PasskeyModal />}
 
-      <section className="container my-auto">
+      <section className="container my-auto mx-auto">
         <div className="mx-auto flex size-full flex-col py-10 max-w-[496px]">
           <div className="flex items-center justify-center mx-auto my-10 text-2xl">
             <h1>
@@ -41,7 +41,7 @@ const Home = async ({ searchParams }: PageProps) => {
         height={1000}
         width={1000}
         alt="hasta"
-        className="side-img max-w-[50%]"
+        className="hidden lg:flex side-img max-w-[50%]"
       />
     </div>
   );
