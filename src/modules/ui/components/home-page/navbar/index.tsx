@@ -19,7 +19,9 @@ const playFair = Playfair_Display({
 });
 
 export const Navbar = () => {
-  const pathname = usePathname(); // kullanmıyorsan kaldır
+  const pathname = usePathname();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   const [userId, setUser] = useState("");
 
   useEffect(() => {
@@ -43,7 +45,7 @@ export const Navbar = () => {
   const navbarItems = [
     { href: "/dashboard/patients", children: "Hastalar" },
     { href: "/dashboard/appointments", children: "Randevular" },
-    // userId henüz yoksa kırık link olmasın: ya gizle ya da "#"
+
     ...(userId
       ? [{ href: `/admin/patients/${userId}/register`, children: "Yeni Kayıt" }]
       : []),
