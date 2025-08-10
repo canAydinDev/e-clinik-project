@@ -30,37 +30,40 @@ export const PatientFormValidation = z.object({
     .string()
     .min(2, "İsim en az 2 karakter olmalıdır")
     .max(50, "İsim en fazla 50 karakter olabilir"),
-  email: z.string().email("Geçersiz e-posta adresi"),
+  email: z.string().email("Geçersiz e-posta adresi").optional(),
   phone: z
     .string()
-    .refine(
-      (phone) => /^\+\d{10,15}$/.test(phone),
-      "Geçersiz telefon numarası"
-    ),
+    .refine((phone) => /^\+\d{10,15}$/.test(phone), "Geçersiz telefon numarası")
+    .optional(),
   birthDate: z.coerce.date(),
 
   address: z
     .string()
     .min(5, "Adres en az 5 karakter olmalıdır")
-    .max(500, "Adres en fazla 500 karakter olabilir"),
+    .max(500, "Adres en fazla 500 karakter olabilir")
+    .optional(),
   allergies: z
     .string()
-    .min(5, "Adres en az 5 karakter olmalıdır")
-    .max(500, "Adres en fazla 500 karakter olabilir"),
+    .min(3, "Allerji en az 3 karakter olmalıdır")
+    .max(500, "Allerji en fazla 500 karakter olabilir")
+    .optional(),
   occupation: z
     .string()
     .min(2, "Meslek en az 2 karakter olmalıdır")
-    .max(500, "Meslek en fazla 500 karakter olabilir"),
+    .max(500, "Meslek en fazla 500 karakter olabilir")
+    .optional(),
   emergencyContactName: z
     .string()
     .min(2, "Yakın kişi adı en az 2 karakter olmalıdır")
-    .max(50, "Yakın kişi adı en fazla 50 karakter olabilir"),
+    .max(50, "Yakın kişi adı en fazla 50 karakter olabilir")
+    .optional(),
   emergencyContactNumber: z
     .string()
     .refine(
       (emergencyContactNumber) => /^\+\d{10,15}$/.test(emergencyContactNumber),
       "Geçersiz telefon numarası"
-    ),
+    )
+    .optional(),
 
   currentMedication: z.string().optional(),
   familyMedicalHistory: z.string().optional(),

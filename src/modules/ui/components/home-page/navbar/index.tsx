@@ -6,26 +6,48 @@ import { Playfair_Display } from "next/font/google";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NavbarSidebar } from "../navbar-sidebar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MenuIcon } from "lucide-react";
 
 import { AuthButton } from "../../auth/auth-button";
 import { NavbarItem } from "../navbar-items";
+import { getCurrentUser } from "@/lib/client/auth";
 
 const playFair = Playfair_Display({
   subsets: ["latin"],
   weight: ["700"],
 });
 
-const navbarItems = [
-  { href: "/dashboard/patients", children: "Hastalar" },
-
-  { href: "/dashboard/appointments", children: "Randevular" },
-];
-
 export const Navbar = () => {
-  const pathname = usePathname();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const pathname = usePathname(); // kullanmıyorsan kaldır
+  const [userId, setUser] = useState("");
+
+  useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      try {
+        const current = await getCurrentUser();
+        setUser(current.$id);
+      } catch (e) {
+        console.error(e);
+        if (mounted) setUser("");
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const navbarItems = [
+    { href: "/dashboard/patients", children: "Hastalar" },
+    { href: "/dashboard/appointments", children: "Randevular" },
+    // userId henüz yoksa kırık link olmasın: ya gizle ya da "#"
+    ...(userId
+      ? [{ href: `/admin/patients/${userId}/register`, children: "Yeni Kayıt" }]
+      : []),
+  ];
   return (
     <nav className="h-20 flex border-b justify-between font-medium bg-white mr-5">
       <div className="flex items-center w-full gap-4 justify-between">
