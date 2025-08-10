@@ -5,21 +5,22 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Form, FormControl } from "@/components/ui/form";
 
-import { CustomFormField } from "../custom-form-field";
-import { SubmitButton } from "../submit-button";
 import { useState } from "react";
 import { PatientFormValidation } from "@/lib/validation";
 import { useRouter } from "next/navigation";
 import { registerPatient } from "@/lib/actions/patient.actions";
-import { FormFieldType } from "../patient-form";
+
 import { PatientFormDefaultValues } from "@/constants";
-import { FileUploader } from "../file-uploader";
+import { CustomFormField } from "../../patient-page/custom-form-field";
+import { FormFieldType } from "../../patient-page/patient-form";
+import { SubmitButton } from "../../patient-page/submit-button";
+import { FileUploader } from "../../patient-page/file-uploader";
 
 interface RegisterFormProps {
   user: User;
 }
 
-export const RegisterForm = ({ user }: RegisterFormProps) => {
+export const DashboardRegisterForm = ({ user }: RegisterFormProps) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -59,7 +60,7 @@ export const RegisterForm = ({ user }: RegisterFormProps) => {
 
       // @ts-ignore
       const patient = await registerPatient(patientData);
-      if (patient) router.push(`/admin/patient/${patient.$id}`);
+      if (patient) router.push(`/dashboard/patient/${patient.$id}`);
     } catch (error) {
       console.error(error);
     }

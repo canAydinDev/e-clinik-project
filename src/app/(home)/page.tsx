@@ -28,7 +28,7 @@ const Home = async ({ searchParams }: PageProps) => {
 
           <div className="text-14-regular mt-20 flex justify-between">
             <p className="justify-items-end text-gray-600 xl:text-left">
-              © 2024 ŞahinKlinik
+              © 2025 ŞahinKlinik
             </p>
             <Link href="/?admin=true" className="text-green-600">
               Yönetim Paneli
