@@ -13,7 +13,7 @@ const Home = async ({ searchParams }: PageProps) => {
   const isAdmin = params?.admin === "true";
 
   return (
-    <div className="flex h-screen max-h-screen">
+    <div className="flex h-screen max-h-screen mx-10 md:mx-0">
       {isAdmin && <PasskeyModal />}
 
       <section className="container my-auto mx-auto">

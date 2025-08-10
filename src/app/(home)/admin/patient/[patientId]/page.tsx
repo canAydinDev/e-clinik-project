@@ -18,7 +18,7 @@ const Patient = async ({ params }: PatientProps) => {
 
   return (
     <div className="flex flex-col justify-between mx-4 mt-4  p-3">
-      <div className="flex flex-row justify-between items-center mb-5 mx-5 ">
+      <div className="flex flex-row justify-between items-center mb-5 mx-5 bg-red-300 ">
         <div>
           <Link
             className="font-bold text-xl"
