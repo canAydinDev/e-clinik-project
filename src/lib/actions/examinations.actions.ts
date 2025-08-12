@@ -1,5 +1,4 @@
 // lib/server/examination.actions.ts
-
 "use server";
 
 import {
@@ -9,35 +8,63 @@ import {
   ID,
   Query,
 } from "@/lib/server/appwrite";
-
 import { parseStringify } from "@/lib/utils";
 
-// 1. Muayene oluşturma
-export const createExamination = async (examinationData: {
+// ---- Tipler ----
+export type Examination = {
+  $id: string;
+  patientId: string;
+  procedure: string;
+  date: string; // ISO
+  doctorNote?: string | null;
+  nextControlDate?: string | null;
+};
+
+type ExaminationCreateInput = {
   patientId: string;
   procedure: string;
   date?: Date;
   doctorNote?: string;
   nextControlDate?: Date;
-}) => {
+};
+
+type ExaminationUpdateInput = Partial<{
+  procedure: string;
+  date: Date;
+  doctorNote?: string;
+  nextControlDate?: Date;
+}>;
+
+// 1) Muayene oluşturma
+export const createExamination = async (
+  examinationData: ExaminationCreateInput
+) => {
   try {
+    const payload: Omit<Examination, "$id"> = {
+      patientId: examinationData.patientId,
+      procedure: examinationData.procedure,
+      date: (examinationData.date ?? new Date()).toISOString(),
+      doctorNote: examinationData.doctorNote ?? null,
+      nextControlDate: examinationData.nextControlDate
+        ? examinationData.nextControlDate.toISOString()
+        : null,
+    };
+
     const newExamination = await databases.createDocument(
       DATABASE_ID!,
       EXAMINATION_COLLECTION_ID!,
       ID.unique(),
-      {
-        ...examinationData,
-        date: (examinationData.date || new Date()).toISOString(),
-        nextControlDate: examinationData.nextControlDate?.toISOString() || null,
-      }
+      payload
     );
 
-    return parseStringify(newExamination);
+    return parseStringify(newExamination) as Examination;
   } catch (error) {
     console.error("Muayene oluşturulurken hata:", error);
     return null;
   }
 };
+
+// 2) Muayene ID ile getir
 export const getExaminationByExamId = async (examinationId: string) => {
   try {
     const result = await databases.getDocument(
@@ -46,28 +73,39 @@ export const getExaminationByExamId = async (examinationId: string) => {
       examinationId
     );
 
-    return parseStringify(result);
+    const exam = parseStringify(result) as Examination;
+    return exam;
   } catch (error) {
     console.error("Muayene ID ile getirilirken hata:", error);
     return null;
   }
 };
 
-// 2. Muayene güncelleme
+// 3) Muayene güncelleme
 export const updateExamination = async (
   examinationId: string,
-  updatedData: Partial<{
-    procedure: string;
-    date: Date;
-    doctorNote?: string;
-    nextControlDate?: Date;
-  }>
+  updatedData: ExaminationUpdateInput
 ) => {
   try {
-    const payload: any = { ...updatedData };
-    if (updatedData.date) payload.date = updatedData.date.toISOString();
-    if (updatedData.nextControlDate)
-      payload.nextControlDate = updatedData.nextControlDate.toISOString();
+    const payload: Partial<Omit<Examination, "$id">> = {};
+
+    if (typeof updatedData.procedure === "string") {
+      payload.procedure = updatedData.procedure;
+    }
+    if (updatedData.date instanceof Date) {
+      payload.date = updatedData.date.toISOString();
+    }
+    if ("doctorNote" in updatedData) {
+      payload.doctorNote =
+        typeof updatedData.doctorNote === "string"
+          ? updatedData.doctorNote
+          : null;
+    }
+    if ("nextControlDate" in updatedData) {
+      payload.nextControlDate = updatedData.nextControlDate
+        ? updatedData.nextControlDate.toISOString()
+        : null;
+    }
 
     const updatedExamination = await databases.updateDocument(
       DATABASE_ID!,
@@ -76,14 +114,14 @@ export const updateExamination = async (
       payload
     );
 
-    return parseStringify(updatedExamination);
+    return parseStringify(updatedExamination) as Examination;
   } catch (error) {
     console.error("Muayene güncellenirken hata:", error);
     return null;
   }
 };
 
-// 3. Muayene silme
+// 4) Muayene silme
 export const deleteExamination = async (examinationId: string) => {
   try {
     await databases.deleteDocument(
@@ -91,7 +129,6 @@ export const deleteExamination = async (examinationId: string) => {
       EXAMINATION_COLLECTION_ID!,
       examinationId
     );
-
     return true;
   } catch (error) {
     console.error("Muayene silinirken hata:", error);
@@ -99,16 +136,21 @@ export const deleteExamination = async (examinationId: string) => {
   }
 };
 
-// 4. Belirli hastaya ait tüm muayeneleri çekme
+// 5) Hastaya göre muayeneleri listele
 export const getExaminationsByPatientId = async (patientId: string) => {
   try {
     const results = await databases.listDocuments(
       DATABASE_ID!,
       EXAMINATION_COLLECTION_ID!,
-      [Query.equal("patientId", [patientId]), Query.orderDesc("date")]
+      [
+        // Appwrite sürümüne göre tek değer ya da dizi kabul edilir:
+        // Query.equal("patientId", patientId)  // (yeni sürümler)
+        Query.equal("patientId", [patientId]), // (eski uyumluluk)
+        Query.orderDesc("date"),
+      ]
     );
 
-    return parseStringify(results.documents);
+    return parseStringify(results.documents) as Examination[];
   } catch (error) {
     console.error("Muayeneler getirilirken hata:", error);
     return [];

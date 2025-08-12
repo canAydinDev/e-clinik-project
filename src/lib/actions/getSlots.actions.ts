@@ -4,7 +4,10 @@ import {
   databases,
   DATABASE_ID,
   APPOINTMENT_COLLECTION_ID,
+  OPENING_HOURS_COLLECTION_ID,
+  CLOSED_DAYS_COLLECTION_ID,
 } from "@/lib/server/appwrite";
+
 import { Query } from "appwrite";
 import { addMinutes, isBefore } from "date-fns";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
@@ -59,10 +62,11 @@ export async function getAvailableSlotsForDayAction(
 
   // 2) Kapalı gün mü?
   const closed = await databases.listDocuments(
-    DATABASE_ID!, // <-- non-null
-    process.env.CLOSED_DAYS_COLLECTION_ID!,
+    DATABASE_ID!,
+    CLOSED_DAYS_COLLECTION_ID, // process.env ... yerine bu
     [Query.equal("date", dateStr)]
   );
+
   if (closed.total > 0) return [];
 
   // 3) Haftanın günü (1=Mon..7=Sun) ve opening_hours kaydını al
@@ -72,10 +76,9 @@ export async function getAvailableSlotsForDayAction(
 
   const ohRes = await databases.listDocuments(
     DATABASE_ID!,
-    process.env.OPENING_HOURS_COLLECTION_ID!,
+    OPENING_HOURS_COLLECTION_ID, // process.env ... yerine bu
     [Query.equal("weekday", weekday)]
   );
-
   const ohDoc = (ohRes.documents?.[0] ??
     null) as unknown as Partial<OpeningHoursDoc> | null;
   if (
@@ -95,7 +98,7 @@ export async function getAvailableSlotsForDayAction(
   // 5) Mevcut randevuları çek (iptaller hariç)
   const appts = await databases.listDocuments(
     DATABASE_ID!,
-    APPOINTMENT_COLLECTION_ID!,
+    APPOINTMENT_COLLECTION_ID, // artık string tipinde
     [
       Query.between(
         "schedule",
