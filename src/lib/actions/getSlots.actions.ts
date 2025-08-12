@@ -95,7 +95,7 @@ export async function getAvailableSlotsForDayAction(
   // 5) Mevcut randevuları çek (iptaller hariç)
   const appts = await databases.listDocuments(
     DATABASE_ID!,
-    APPOINTMENT_COLLECTION_ID,
+    APPOINTMENT_COLLECTION_ID!,
     [
       Query.between(
         "schedule",
