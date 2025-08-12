@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import { getAvailableSlotsForDayAction } from "@/lib/actions/getSlots.actions";
 import { createAppointment } from "@/lib/actions/appointment.actions";
-import { Appointment } from "../../../../../../types/appwrite.types";
+import type { Appointment } from "../../../../../../types/appwrite.types";
 
 const SERVICES = [
   { id: "botox", name: "Botoks", durationMin: 30 },
@@ -42,7 +42,7 @@ export function AppointmentSelector({
   const loadSlots = async () => {
     setLoading(true);
     try {
-      const dateStr = format(date, "yyyy-MM-dd"); // yerel gün → "YYYY-MM-DD"
+      const dateStr = format(date, "yyyy-MM-dd");
       const slotsRes = await getAvailableSlotsForDayAction(
         dateStr,
         durationMin
@@ -63,7 +63,7 @@ export function AppointmentSelector({
         patient: patientId,
         userId,
         reason: "Online randevu",
-        schedule: new Date(isoStart), // UTC ISO → Date
+        schedule: new Date(isoStart),
         durationMin,
         status: "scheduled",
         note: "",
@@ -80,7 +80,6 @@ export function AppointmentSelector({
       }
 
       toast.success("Randevu oluşturuldu.");
-      // Başarılıysa listeyi tazele (aynı saat kaybolur)
       await loadSlots();
     } catch (e) {
       console.error(e);
@@ -98,9 +97,9 @@ export function AppointmentSelector({
           type="date"
           className="border rounded px-2 py-1"
           value={format(date, "yyyy-MM-dd")}
-          onChange={(e) => {
-            const [y, m, d] = e.target.value.split("-").map(Number);
-            setDate(new Date(y, m - 1, d));
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            // Parçalama yerine direkt Date oluştur: TS hatası kalmaz
+            setDate(new Date(`${e.target.value}T00:00:00`)); // yerel 00:00
           }}
         />
 
