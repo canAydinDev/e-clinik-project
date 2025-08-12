@@ -27,16 +27,15 @@ const client = new Client()
 
 const db = new Databases(client);
 
-// 1=Mon ... 7=Sun
-const HOURS: Record<number, { open: string; close: string }> = {
+const HOURS = {
   1: { open: "09:00", close: "17:00" },
   2: { open: "09:00", close: "17:00" },
   3: { open: "09:00", close: "17:00" },
   4: { open: "09:00", close: "17:00" },
   5: { open: "09:00", close: "17:00" },
   6: { open: "10:00", close: "14:00" },
-  7: { open: "00:00", close: "00:00" }, // kapalı
-};
+  7: { open: "00:00", close: "00:00" },
+} as const;
 
 async function upsert(weekday: number, open: string, close: string) {
   const id = `wh_${weekday}`;
@@ -50,13 +49,15 @@ async function upsert(weekday: number, open: string, close: string) {
   } catch (e: unknown) {
     await db.updateDocument(databaseId, openingColId, id, { open, close });
     console.log("updated", id, open, close);
+    console.log(e);
   }
 }
 
 async function main() {
-  for (const w of Object.keys(HOURS).map(Number)) {
-    const { open, close } = HOURS[w];
-    await upsert(w, open, close);
+  // entries ile hem key hem value güvenli gelir
+  for (const [wStr, hours] of Object.entries(HOURS)) {
+    const weekday = Number(wStr);
+    await upsert(weekday, hours.open, hours.close);
   }
   console.log("Seed OK");
 }
