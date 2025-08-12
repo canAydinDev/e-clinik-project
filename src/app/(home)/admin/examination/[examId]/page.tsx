@@ -9,7 +9,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { DeleteExaminationButton } from "@/modules/ui/components/admin-page/examination-page/delete-examination";
-import type { Patient } from "@/types/appwrite.types";
+import { Patient } from "../../../../../../types/appwrite.types";
 
 const Page = async ({
   params,
