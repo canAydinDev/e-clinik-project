@@ -1,37 +1,58 @@
+// src/app/(home)/admin/examination/[examId]/page.tsx
 import { getExaminationByExamId } from "@/lib/actions/examinations.actions";
-
+import {
+  databases,
+  DATABASE_ID,
+  PATIENT_COLLECTION_ID,
+} from "@/lib/server/appwrite";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { DeleteExaminationButton } from "@/modules/ui/components/admin-page/examination-page/delete-examination";
+import { Patient } from "../../../../../../types/appwrite.types";
 
-interface PageProp {
-  params: Promise<{ examId: string }>;
+interface PageProps {
+  params: { examId: string };
 }
 
-const Page = async ({ params }: PageProp) => {
-  const { examId } = await params;
+const Page = async ({ params }: PageProps) => {
+  const { examId } = params;
 
   const exam = await getExaminationByExamId(examId);
-  const patient = exam.patientId;
-
   if (!exam) {
     return <div>Muayene bulunamadı.</div>;
   }
 
+  // exam.patientId = string (hasta dokümanının ID'si)
+  const patientId: string = exam.patientId;
+
+  // Hasta dokümanını getir
+  let patient: Patient | null = null;
+  try {
+    const doc = await databases.getDocument(
+      DATABASE_ID,
+      PATIENT_COLLECTION_ID!,
+      patientId
+    );
+    patient = doc as unknown as Patient;
+  } catch {
+    patient = null;
+  }
+
   return (
-    <div className="p-6  min-h-screen">
-      <div className="flex flex-row justify-between items-center mb-5 mx-5 ">
+    <div className="p-6 min-h-screen">
+      <div className="flex flex-row justify-between items-center mb-5 mx-5">
         <div>
           <Link
-            href={`/admin/patient/${patient.$id}`}
+            href={`/admin/patient/${patient ? patient.$id : patientId}`}
             className="font-bold text-xl"
           >
-            {patient.name}
+            {patient?.name ?? "Hasta"}
           </Link>
         </div>
+
         <div>
-          {patient.faceUrl ? (
+          {patient?.faceUrl ? (
             <Image
               src={patient.faceUrl}
               alt="Hasta Fotoğrafı"
@@ -47,25 +68,26 @@ const Page = async ({ params }: PageProp) => {
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 mx-auto">
-        <div className="flex w-full md:w-[30%] rounded-xl border  min-h-[200px]  p-4 flex-col items-center">
-          <h2 className="font-semibold text-lg">Islem</h2>
+        <div className="flex w-full md:w-[30%] rounded-xl border min-h-[200px] p-4 flex-col items-center">
+          <h2 className="font-semibold text-lg">İşlem</h2>
           <p>{exam.procedure}</p>
         </div>
 
-        <div className="flex w-full md:w-[30%] rounded-xl border  min-h-[200px] p-4 flex-col items-center">
+        <div className="flex w-full md:w-[30%] rounded-xl border min-h-[200px] p-4 flex-col items-center">
           <h2 className="font-semibold text-lg">Not</h2>
-          <p>{exam.doctorNote}</p>
+          <p>{exam.doctorNote ?? "—"}</p>
         </div>
 
         <div className="flex flex-col gap-2 m-2">
           <Button asChild variant="greenElevated">
             <Link href={`/admin/examination/${examId}/edit`}>
-              Muayeneyi Duzenle
+              Muayeneyi Düzenle
             </Link>
           </Button>
+
           <DeleteExaminationButton
             examinationId={examId}
-            redirectTo={`/admin/patient/${patient.$id}`}
+            redirectTo={`/admin/patient/${patient ? patient.$id : patientId}`}
           />
         </div>
       </div>
