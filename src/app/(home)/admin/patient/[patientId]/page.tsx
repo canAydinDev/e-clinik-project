@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { getPatientById } from "@/lib/actions/patient.actions";
 import { ExaminationHomePage } from "@/modules/ui/components/admin-page/examination-page/examination-ana-homepage";
+import { AppointmentSelector } from "@/modules/ui/components/randevu/appointment-selector";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -61,6 +62,13 @@ const Patient = async ({ params }: PatientProps) => {
             </Button>
           </div>
         </div>
+      </div>
+
+      <div>
+        <AppointmentSelector
+          patientId={patientId}
+          userId="6883b29700098b661379"
+        />
       </div>
     </div>
   );

@@ -12,7 +12,9 @@ import { parseStringify } from "../utils";
 import { Appointment } from "../../../types/appwrite.types";
 import { revalidatePath } from "next/cache";
 
-export const createAppointment = async (
+import { addMinutes, setMilliseconds, setSeconds } from "date-fns";
+
+export const createAppointment2 = async (
   appointment: CreateAppointmentParams
 ) => {
   try {
@@ -28,6 +30,106 @@ export const createAppointment = async (
     console.log(error);
   }
 };
+
+export type CreateAppointmentParams = {
+  userId: string;
+  patient: string;
+  reason: string;
+  schedule: Date; // UTC Date
+  durationMin: number; // dk
+  status: "scheduled" | "pending" | "cancelled" | "completed";
+  note?: string;
+  cancellationReason?: string;
+};
+
+export type CreateAppointmentResult =
+  | Appointment
+  | { error: "SLOT_TAKEN" | "UNKNOWN" };
+
+// ISO içindeki uygunsuz karakterleri sadeleştir
+const docIdFromStart = (startUtc: Date): string =>
+  `apt_${startUtc.toISOString().replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+
+export const createAppointment = async (
+  params: CreateAppointmentParams
+): Promise<CreateAppointmentResult> => {
+  // dakika hizası
+  const start = setMilliseconds(setSeconds(new Date(params.schedule), 0), 0);
+  const end = addMinutes(start, params.durationMin);
+  const docId = docIdFromStart(start);
+
+  const payload = {
+    patient: params.patient,
+    userId: params.userId,
+    reason: params.reason,
+    schedule: start.toISOString(),
+    end: end.toISOString(),
+    durationMin: params.durationMin,
+    status: params.status,
+    note: params.note ?? "",
+    cancellationReason: params.cancellationReason ?? "",
+  };
+
+  try {
+    const created = await databases.createDocument(
+      DATABASE_ID!,
+      APPOINTMENT_COLLECTION_ID!,
+      docId,
+      payload
+    );
+    // parseStringify dönüşünü tipli yap
+    return parseStringify(created) as Appointment;
+  } catch (e: unknown) {
+    const err = e as { code?: number };
+
+    // 409 => aynı docId zaten var
+    if (err?.code === 409) {
+      try {
+        const existing = await databases.getDocument(
+          DATABASE_ID!,
+          APPOINTMENT_COLLECTION_ID!,
+          docId
+        );
+
+        // iptal edilmişse revive et
+        if ((existing as { status?: string })?.status === "cancelled") {
+          const revived = await databases.updateDocument(
+            DATABASE_ID!,
+            APPOINTMENT_COLLECTION_ID!,
+            docId,
+            {
+              patient: params.patient,
+              userId: params.userId,
+              reason: params.reason,
+              schedule: start.toISOString(),
+              end: end.toISOString(),
+              durationMin: params.durationMin,
+              status: "scheduled",
+              note: params.note ?? "",
+              cancellationReason: "",
+            }
+          );
+          return parseStringify(revived) as Appointment;
+        }
+      } catch {
+        // get/update hatası → UNKNOWN'a düşer
+      }
+      return { error: "SLOT_TAKEN" };
+    }
+
+    console.error(e);
+    return { error: "UNKNOWN" };
+  }
+};
+
+export async function cancelAppointment(appointmentId: string, reason = "") {
+  return databases.updateDocument(
+    DATABASE_ID!,
+    APPOINTMENT_COLLECTION_ID!,
+    appointmentId,
+    { status: "cancelled", cancellationReason: reason }
+  );
+}
 
 export const getAppointment = async (appointmentId: string) => {
   try {
