@@ -9,21 +9,20 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { DeleteExaminationButton } from "@/modules/ui/components/admin-page/examination-page/delete-examination";
-import { Patient } from "../../../../../../types/appwrite.types";
+import type { Patient } from "@/types/appwrite.types";
 
-interface PageProps {
-  params: { examId: string };
-}
-
-const Page = async ({ params }: PageProps) => {
-  const { examId } = params;
-
+const Page = async ({
+  params,
+}: {
+  params: Promise<{ examId: string }>; // <-- Next bu route için böyle bekliyor
+}) => {
+  const { examId } = await params; // <-- await et
   const exam = await getExaminationByExamId(examId);
+
   if (!exam) {
     return <div>Muayene bulunamadı.</div>;
   }
 
-  // exam.patientId = string (hasta dokümanının ID'si)
   const patientId: string = exam.patientId;
 
   // Hasta dokümanını getir
