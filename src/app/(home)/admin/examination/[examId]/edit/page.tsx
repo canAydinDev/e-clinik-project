@@ -1,12 +1,13 @@
+// src/app/(home)/admin/examination/[examId]/edit/page.tsx
 import { getExaminationByExamId } from "@/lib/actions/examinations.actions";
 import { EditExaminationForm } from "@/modules/ui/components/admin-page/examination-page/update-examination-form";
 
 interface PageProps {
-  params: Promise<{ examId: string }>;
+  params: { examId: string }; // <-- Promise değil
 }
 
 const Page = async ({ params }: PageProps) => {
-  const { examId } = await params;
+  const { examId } = params; // <-- await yok
   const exam = await getExaminationByExamId(examId);
 
   if (!exam) return <div>Muayene bulunamadı.</div>;
@@ -17,9 +18,9 @@ const Page = async ({ params }: PageProps) => {
         examinationId={exam.$id}
         initialValues={{
           procedure: exam.procedure,
-          doctorNote: exam.doctorNote,
-          date: exam.date,
-          nextControlDate: exam.nextControlDate,
+          doctorNote: exam.doctorNote ?? undefined, // <-- null → undefined
+          date: exam.date ?? undefined, // (form tipin date?: string | undefined ise)
+          nextControlDate: exam.nextControlDate ?? undefined, // <-- null → undefined
         }}
       />
     </div>
