@@ -7,6 +7,8 @@ import {
   Query,
   APPOINTMENT_COLLECTION_ID,
 } from "@/lib/server/appwrite";
+// "@/lib/actions/appointment.actions"
+import { unstable_noStore as noStore } from "next/cache";
 
 import { parseStringify } from "../utils";
 import { Appointment } from "../../../types/appwrite.types";
@@ -123,12 +125,18 @@ export const createAppointment = async (
 };
 
 export async function cancelAppointment(appointmentId: string, reason = "") {
-  return databases.updateDocument(
+  const updated = await databases.updateDocument(
     DATABASE_ID!,
     APPOINTMENT_COLLECTION_ID!,
     appointmentId,
     { status: "cancelled", cancellationReason: reason }
   );
+
+  // Tablo sayfalarını yenile
+  revalidatePath("/admin/appointments", "page"); // route’unuza göre
+  // revalidatePath(`/admin/patient/${patientId}`, "page"); // gerekiyorsa
+
+  return updated;
 }
 
 export const getAppointment = async (appointmentId: string) => {
@@ -146,6 +154,7 @@ export const getAppointment = async (appointmentId: string) => {
 };
 
 export const getRecentAppointmentList = async () => {
+  noStore();
   try {
     const appointments = await databases.listDocuments(
       DATABASE_ID!,
@@ -186,26 +195,96 @@ export const getRecentAppointmentList = async () => {
   }
 };
 
+export type UpdateAppointmentParams = {
+  userId: string;
+  appointmentId: string;
+  appointment: Partial<{
+    schedule: Date | string;
+    status: "scheduled" | "pending" | "cancelled" | "completed";
+    reason: string;
+    note: string;
+    cancellationReason: string;
+    durationMin: number;
+  }>;
+  // İstersen dışarıdan da path geçebilirsin
+  revalidatePaths?: string[];
+};
+
 export const updateAppointment = async ({
   appointmentId,
-
   appointment,
+  revalidatePaths,
 }: UpdateAppointmentParams) => {
   try {
-    const updateAppointment = await databases.updateDocument(
+    // 1) Mevcut randevuyu al (durationMin ve diğer alanlara erişmek için)
+    const existing = (await databases.getDocument(
+      DATABASE_ID!,
+      APPOINTMENT_COLLECTION_ID!,
+      appointmentId
+    )) as unknown as Appointment;
+
+    // 2) Yeni başlangıç ve bitişi hazırla (schedule verilmişse)
+    let scheduleISO: string | undefined;
+    let endISO: string | undefined;
+    let duration = appointment.durationMin ?? existing.durationMin ?? 30;
+
+    if (appointment.schedule) {
+      const start = setMilliseconds(
+        setSeconds(new Date(appointment.schedule), 0),
+        0
+      );
+      scheduleISO = start.toISOString();
+      endISO = addMinutes(start, duration).toISOString();
+
+      // 3) ÇAKIŞMA KONTROLÜ:
+      // Aynı 'schedule' değerine sahip, iptal olmayan ve KENDİSİ olmayan bir randevu var mı?
+      const sameStart = await databases.listDocuments(
+        DATABASE_ID!,
+        APPOINTMENT_COLLECTION_ID!,
+        [Query.equal("schedule", scheduleISO), Query.limit(2)]
+      );
+
+      const hasConflict = (sameStart.documents as Appointment[]).some(
+        (doc) => doc.$id !== appointmentId && doc.status !== "cancelled"
+      );
+
+      if (hasConflict) {
+        return { error: "SLOT_TAKEN" } as const;
+      }
+    }
+
+    // 4) Güncellenecek payload’u kur
+    const payload: Record<string, unknown> = {
+      ...appointment,
+    };
+    if (scheduleISO) {
+      payload.schedule = scheduleISO;
+      payload.end = endISO;
+      payload.durationMin = duration;
+    }
+
+    // 5) Güncelle
+    const updated = await databases.updateDocument(
       DATABASE_ID!,
       APPOINTMENT_COLLECTION_ID!,
       appointmentId,
-      appointment
+      payload
     );
 
-    if (!updateAppointment) {
-      throw new Error("Randevu bulunamadi");
+    if (!updated) {
+      throw new Error("Randevu bulunamadı");
     }
 
-    revalidatePath("/admin");
-    return parseStringify(updateAppointment);
+    // 6) DOĞRU SAYFALARI revalidate ET
+    const paths = revalidatePaths ?? [
+      "/admin/appointments", // <-- Tablonun route’unu buraya koy
+      // `/admin/patient/${existing.patient}`, // hasta sayfasında da tablo varsa ekle
+    ];
+    paths.forEach((p) => revalidatePath(p, "page"));
+
+    return parseStringify(updated);
   } catch (error) {
     console.log(error);
+    return { error: "UNKNOWN" } as const;
   }
 };

@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { getPatientById } from "@/lib/actions/patient.actions";
 import { ExaminationHomePage } from "@/modules/ui/components/admin-page/examination-page/examination-ana-homepage";
-import { AppointmentSelector } from "@/modules/ui/components/randevu/appointment-selector";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -19,7 +18,7 @@ const Patient = async ({ params }: PatientProps) => {
 
   return (
     <div className="flex flex-col justify-between mx-4 mt-4  p-3">
-      <div className="flex flex-row justify-between items-center mb-5 mx-5 bg-red-300 ">
+      <div className="flex flex-row justify-between items-center mb-5 mx-5  min-h-[50px] px-5 ">
         <div>
           <Link
             className="font-bold text-xl"
@@ -62,13 +61,6 @@ const Patient = async ({ params }: PatientProps) => {
             </Button>
           </div>
         </div>
-      </div>
-
-      <div>
-        <AppointmentSelector
-          patientId={patientId}
-          userId="6883b29700098b661379"
-        />
       </div>
     </div>
   );

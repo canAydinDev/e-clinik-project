@@ -10,8 +10,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useState } from "react";
-import { AppointmentForm } from "../../appointment-page/appointment-form";
+
 import { Appointment } from "../../../../../../types/appwrite.types";
+import { AppointmentForm } from "../../appointment-page/appointment-form";
 
 interface AppointmentModalProps {
   type: "schedule" | "cancel";
