@@ -179,7 +179,6 @@ export const AppointmentForm = ({
             reason: form.getValues("reason") ?? appointment?.reason,
             note: form.getValues("note") ?? appointment?.note,
           },
-          type,
         });
 
         if (updated) {
