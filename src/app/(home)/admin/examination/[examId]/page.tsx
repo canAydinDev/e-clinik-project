@@ -1,7 +1,7 @@
 // src/app/(home)/admin/examination/[examId]/page.tsx
 import { getExaminationByExamId } from "@/lib/actions/examinations.actions";
 import {
-  databases,
+  getDatabases,
   DATABASE_ID,
   PATIENT_COLLECTION_ID,
 } from "@/lib/server/appwrite";
@@ -9,30 +9,31 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { DeleteExaminationButton } from "@/modules/ui/components/admin-page/examination-page/delete-examination";
-import { Patient } from "../../../../../../types/appwrite.types";
+import type { Patient } from "../../../../../../types/appwrite.types";
 
 const Page = async ({
   params,
 }: {
-  params: Promise<{ examId: string }>; // <-- Next bu route için böyle bekliyor
+  // ✅ Next App Router: params Promise DEĞİL
+  params: { examId: string };
 }) => {
-  const { examId } = await params; // <-- await et
+  const { examId } = params; // ✅ await kaldırıldı
   const exam = await getExaminationByExamId(examId);
 
   if (!exam) {
     return <div>Muayene bulunamadı.</div>;
   }
 
+  const databases = getDatabases(); // ✅ lazy getter
+  const dbId = DATABASE_ID(); // ✅ fonksiyon çağrısı
+  const patientColId = PATIENT_COLLECTION_ID(); // ✅ fonksiyon çağrısı
+
   const patientId: string = exam.patientId;
 
   // Hasta dokümanını getir
   let patient: Patient | null = null;
   try {
-    const doc = await databases.getDocument(
-      DATABASE_ID,
-      PATIENT_COLLECTION_ID!,
-      patientId
-    );
+    const doc = await databases.getDocument(dbId, patientColId, patientId);
     patient = doc as unknown as Patient;
   } catch {
     patient = null;
