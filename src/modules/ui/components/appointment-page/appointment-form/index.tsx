@@ -57,6 +57,7 @@ export const AppointmentForm = ({
   const [slots, setSlots] = React.useState<SlotItem[]>([]);
   const [isFetchingSlots, setIsFetchingSlots] = React.useState(false);
   const [selectedSlot, setSelectedSlot] = React.useState<string | null>(null);
+
   const durationMin: number = React.useMemo(() => {
     const found = SERVICES.find((s) => s.id === serviceId);
     return found ? found.durationMin : 0;
@@ -67,7 +68,7 @@ export const AppointmentForm = ({
   const form = useForm<z.infer<typeof AppointmentFormValidation>>({
     resolver: zodResolver(AppointmentFormValidation),
     defaultValues: {
-      // schedule form alanı şema gereği dursa da, create/schedule'da gerçek tarih selectedSlot'tan gelir
+      // create/schedule'da gerçek tarih selectedSlot'tan gelir
       schedule: appointment ? new Date(appointment.schedule) : new Date(),
       reason: appointment?.reason ?? "",
       note: appointment?.note ?? "",
@@ -110,32 +111,31 @@ export const AppointmentForm = ({
         : "pending";
 
     try {
-      // 1) İPTAL AKIŞI — eksikti, tamamladık
+      // 1) İPTAL AKIŞI
       if (type === "cancel") {
         const updated = await updateAppointment({
           userId,
           appointmentId: appointment?.$id || "",
           appointment: {
-            // iptal akışında zamanı dokunmadan da bırakabilirsin; istersen values.schedule kullan
+            // iptalde zamanı değiştirmek istemezsen mevcut zamanı koru
             schedule: appointment?.schedule
               ? new Date(appointment.schedule)
               : new Date(values.schedule),
             status, // "cancelled"
             cancellationReason: values?.cancellationReason ?? "",
           },
-          type,
         });
 
         if (updated) {
           toast.success("Randevu iptal edildi.");
           form.reset();
           setOpen?.(false);
-          router.refresh(); // << UI'yı yenile
+          router.refresh();
         }
         return;
       }
 
-      // 2) CREATE — aynen kalsın
+      // 2) CREATE
       if (type === "create") {
         if (!selectedSlot) {
           toast.error("Lütfen bir saat (slot) seçin.");
@@ -157,13 +157,12 @@ export const AppointmentForm = ({
           setSelectedSlot(null);
           setSlots([]);
           setOpen?.(false);
-          router.push(`/admin/patient/${patientId}`); // mevcut davranışın
-          // router.refresh(); // push yerine aynı sayfadaysan refresh kullanabilirsin
+          router.push(`/admin/patient/${patientId}`);
         }
         return;
       }
 
-      // 3) SCHEDULE (PLANLA) — slot zorunlu, reason/note da güncelleniyor + UI refresh
+      // 3) SCHEDULE (PLANLA)
       if (type === "schedule") {
         if (!selectedSlot) {
           toast.error("Lütfen yeni bir saat (slot) seçin.");
@@ -174,8 +173,8 @@ export const AppointmentForm = ({
           userId,
           appointmentId: appointment?.$id || "",
           appointment: {
-            schedule: new Date(selectedSlot), // << yeni saat
-            status, // "scheduled"
+            schedule: new Date(selectedSlot), // yeni saat
+            status: "scheduled",
             reason: form.getValues("reason") ?? appointment?.reason,
             note: form.getValues("note") ?? appointment?.note,
           },
@@ -187,7 +186,7 @@ export const AppointmentForm = ({
           setSelectedSlot(null);
           setSlots([]);
           setOpen?.(false);
-          router.refresh(); // << listeler/üst komponentler yeniden render
+          router.refresh();
         }
       }
     } catch (error) {
@@ -202,7 +201,7 @@ export const AppointmentForm = ({
     [date]
   );
 
-  let buttonLabel: string | undefined;
+  let buttonLabel: string;
   switch (type) {
     case "cancel":
       buttonLabel = "Randevuyu İptal Et";
@@ -230,7 +229,7 @@ export const AppointmentForm = ({
           </section>
         )}
 
-        {/* create & schedule: yeni yapı (AppointmentCreateForm) */}
+        {/* create & schedule */}
         {type !== "cancel" && (
           <>
             {/* Tarih & Hizmet seçimi */}
