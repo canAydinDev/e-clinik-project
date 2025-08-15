@@ -1,21 +1,22 @@
 import {
+  getDatabases,
   DATABASE_ID,
   EXAMINATION_COLLECTION_ID,
-  databases,
   Query,
 } from "@/lib/server/appwrite";
 
 import { parseStringify } from "@/lib/utils";
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
 import { z } from "zod";
-import { Examination } from "../../../../types/form";
+import type { Examination } from "../../../../types/form";
 
 export const examinationsRouter = createTRPCRouter({
   getMany: baseProcedure.query(async (): Promise<Examination[]> => {
+    const databases = getDatabases();
     try {
       const examinations = await databases.listDocuments(
-        DATABASE_ID!,
-        EXAMINATION_COLLECTION_ID!
+        DATABASE_ID(),
+        EXAMINATION_COLLECTION_ID()
       );
       return parseStringify(examinations.documents) as Examination[];
     } catch (error) {
@@ -27,10 +28,11 @@ export const examinationsRouter = createTRPCRouter({
   getManyByPatientId: baseProcedure
     .input(z.string()) // patientId
     .query(async ({ input: patientId }): Promise<Examination[]> => {
+      const databases = getDatabases();
       try {
         const examinations = await databases.listDocuments(
-          DATABASE_ID!,
-          EXAMINATION_COLLECTION_ID!,
+          DATABASE_ID(),
+          EXAMINATION_COLLECTION_ID(),
           [Query.equal("patientId", [patientId]), Query.orderDesc("date")]
         );
 
