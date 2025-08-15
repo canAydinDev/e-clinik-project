@@ -2,9 +2,9 @@
 "use server";
 
 import {
+  getDatabases,
   DATABASE_ID,
   EXAMINATION_COLLECTION_ID,
-  databases,
   ID,
   Query,
 } from "@/lib/server/appwrite";
@@ -39,6 +39,8 @@ type ExaminationUpdateInput = Partial<{
 export const createExamination = async (
   examinationData: ExaminationCreateInput
 ) => {
+  const databases = getDatabases();
+
   try {
     const payload: Omit<Examination, "$id"> = {
       patientId: examinationData.patientId,
@@ -51,8 +53,8 @@ export const createExamination = async (
     };
 
     const newExamination = await databases.createDocument(
-      DATABASE_ID!,
-      EXAMINATION_COLLECTION_ID!,
+      DATABASE_ID(),
+      EXAMINATION_COLLECTION_ID(),
       ID.unique(),
       payload
     );
@@ -66,10 +68,12 @@ export const createExamination = async (
 
 // 2) Muayene ID ile getir
 export const getExaminationByExamId = async (examinationId: string) => {
+  const databases = getDatabases();
+
   try {
     const result = await databases.getDocument(
-      DATABASE_ID!,
-      EXAMINATION_COLLECTION_ID!,
+      DATABASE_ID(),
+      EXAMINATION_COLLECTION_ID(),
       examinationId
     );
 
@@ -86,6 +90,8 @@ export const updateExamination = async (
   examinationId: string,
   updatedData: ExaminationUpdateInput
 ) => {
+  const databases = getDatabases();
+
   try {
     const payload: Partial<Omit<Examination, "$id">> = {};
 
@@ -108,8 +114,8 @@ export const updateExamination = async (
     }
 
     const updatedExamination = await databases.updateDocument(
-      DATABASE_ID!,
-      EXAMINATION_COLLECTION_ID!,
+      DATABASE_ID(),
+      EXAMINATION_COLLECTION_ID(),
       examinationId,
       payload
     );
@@ -123,10 +129,12 @@ export const updateExamination = async (
 
 // 4) Muayene silme
 export const deleteExamination = async (examinationId: string) => {
+  const databases = getDatabases();
+
   try {
     await databases.deleteDocument(
-      DATABASE_ID!,
-      EXAMINATION_COLLECTION_ID!,
+      DATABASE_ID(),
+      EXAMINATION_COLLECTION_ID(),
       examinationId
     );
     return true;
@@ -138,14 +146,15 @@ export const deleteExamination = async (examinationId: string) => {
 
 // 5) Hastaya göre muayeneleri listele
 export const getExaminationsByPatientId = async (patientId: string) => {
+  const databases = getDatabases();
+
   try {
     const results = await databases.listDocuments(
-      DATABASE_ID!,
-      EXAMINATION_COLLECTION_ID!,
+      DATABASE_ID(),
+      EXAMINATION_COLLECTION_ID(),
       [
-        // Appwrite sürümüne göre tek değer ya da dizi kabul edilir:
-        // Query.equal("patientId", patientId)  // (yeni sürümler)
-        Query.equal("patientId", [patientId]), // (eski uyumluluk)
+        // Appwrite sürümüne göre tek değer ya da dizi kabul edilebilir
+        Query.equal("patientId", [patientId]),
         Query.orderDesc("date"),
       ]
     );

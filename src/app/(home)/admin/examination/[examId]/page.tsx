@@ -14,23 +14,22 @@ import type { Patient } from "../../../../../../types/appwrite.types";
 const Page = async ({
   params,
 }: {
-  // ✅ Next App Router: params Promise DEĞİL
-  params: { examId: string };
+  // Projenizin PageProps kısıtı Promise bekliyor
+  params: Promise<{ examId: string }>;
 }) => {
-  const { examId } = params; // ✅ await kaldırıldı
+  const { examId } = await params; // <- Promise olduğu için await et
   const exam = await getExaminationByExamId(examId);
 
   if (!exam) {
     return <div>Muayene bulunamadı.</div>;
   }
 
-  const databases = getDatabases(); // ✅ lazy getter
-  const dbId = DATABASE_ID(); // ✅ fonksiyon çağrısı
-  const patientColId = PATIENT_COLLECTION_ID(); // ✅ fonksiyon çağrısı
+  const databases = getDatabases();
+  const dbId = DATABASE_ID();
+  const patientColId = PATIENT_COLLECTION_ID();
 
   const patientId: string = exam.patientId;
 
-  // Hasta dokümanını getir
   let patient: Patient | null = null;
   try {
     const doc = await databases.getDocument(dbId, patientColId, patientId);

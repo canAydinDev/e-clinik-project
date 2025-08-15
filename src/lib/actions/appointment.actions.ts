@@ -1,37 +1,18 @@
 "use server";
 
 import {
+  getDatabases,
   DATABASE_ID,
-  databases,
   ID,
   Query,
   APPOINTMENT_COLLECTION_ID,
 } from "@/lib/server/appwrite";
-// "@/lib/actions/appointment.actions"
-import { unstable_noStore as noStore } from "next/cache";
+import { unstable_noStore as noStore, revalidatePath } from "next/cache";
 
 import { parseStringify } from "../utils";
 import { Appointment } from "../../../types/appwrite.types";
-import { revalidatePath } from "next/cache";
 
 import { addMinutes, setMilliseconds, setSeconds } from "date-fns";
-
-export const createAppointment2 = async (
-  appointment: CreateAppointmentParams
-) => {
-  try {
-    const newAppointment = await databases.createDocument(
-      DATABASE_ID!,
-      APPOINTMENT_COLLECTION_ID!,
-      ID.unique(),
-      appointment
-    );
-
-    return parseStringify(newAppointment);
-  } catch (error) {
-    console.log(error);
-  }
-};
 
 export type CreateAppointmentParams = {
   userId: string;
@@ -52,9 +33,33 @@ export type CreateAppointmentResult =
 const docIdFromStart = (startUtc: Date): string =>
   `apt_${startUtc.toISOString().replace(/[^a-zA-Z0-9_-]/g, "-")}`;
 
+/**
+ * Basit create (ID.unique ile)
+ * Eğer bunu kullanacaksan getDatabases / env getter'larına uyarladım.
+ */
+export const createAppointment2 = async (
+  appointment: CreateAppointmentParams
+) => {
+  const databases = getDatabases();
+  try {
+    const newAppointment = await databases.createDocument(
+      DATABASE_ID(),
+      APPOINTMENT_COLLECTION_ID(),
+      ID.unique(),
+      appointment
+    );
+
+    return parseStringify(newAppointment);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 export const createAppointment = async (
   params: CreateAppointmentParams
 ): Promise<CreateAppointmentResult> => {
+  const databases = getDatabases();
+
   // dakika hizası
   const start = setMilliseconds(setSeconds(new Date(params.schedule), 0), 0);
   const end = addMinutes(start, params.durationMin);
@@ -74,12 +79,11 @@ export const createAppointment = async (
 
   try {
     const created = await databases.createDocument(
-      DATABASE_ID!,
-      APPOINTMENT_COLLECTION_ID!,
+      DATABASE_ID(),
+      APPOINTMENT_COLLECTION_ID(),
       docId,
       payload
     );
-    // parseStringify dönüşünü tipli yap
     return parseStringify(created) as Appointment;
   } catch (e: unknown) {
     const err = e as { code?: number };
@@ -88,16 +92,16 @@ export const createAppointment = async (
     if (err?.code === 409) {
       try {
         const existing = await databases.getDocument(
-          DATABASE_ID!,
-          APPOINTMENT_COLLECTION_ID!,
+          DATABASE_ID(),
+          APPOINTMENT_COLLECTION_ID(),
           docId
         );
 
         // iptal edilmişse revive et
         if ((existing as { status?: string })?.status === "cancelled") {
           const revived = await databases.updateDocument(
-            DATABASE_ID!,
-            APPOINTMENT_COLLECTION_ID!,
+            DATABASE_ID(),
+            APPOINTMENT_COLLECTION_ID(),
             docId,
             {
               patient: params.patient,
@@ -125,25 +129,29 @@ export const createAppointment = async (
 };
 
 export async function cancelAppointment(appointmentId: string, reason = "") {
+  const databases = getDatabases();
+
   const updated = await databases.updateDocument(
-    DATABASE_ID!,
-    APPOINTMENT_COLLECTION_ID!,
+    DATABASE_ID(),
+    APPOINTMENT_COLLECTION_ID(),
     appointmentId,
     { status: "cancelled", cancellationReason: reason }
   );
 
   // Tablo sayfalarını yenile
-  revalidatePath("/admin/appointments", "page"); // route’unuza göre
+  revalidatePath("/admin/appointments", "page");
   // revalidatePath(`/admin/patient/${patientId}`, "page"); // gerekiyorsa
 
   return updated;
 }
 
 export const getAppointment = async (appointmentId: string) => {
+  const databases = getDatabases();
+
   try {
     const appointment = await databases.getDocument(
-      DATABASE_ID!,
-      APPOINTMENT_COLLECTION_ID!,
+      DATABASE_ID(),
+      APPOINTMENT_COLLECTION_ID(),
       appointmentId
     );
 
@@ -154,11 +162,12 @@ export const getAppointment = async (appointmentId: string) => {
 };
 
 export const getRecentAppointmentList = async () => {
+  const databases = getDatabases();
   noStore();
   try {
     const appointments = await databases.listDocuments(
-      DATABASE_ID!,
-      APPOINTMENT_COLLECTION_ID!,
+      DATABASE_ID(),
+      APPOINTMENT_COLLECTION_ID(),
       [Query.orderDesc("$createdAt")]
     );
 
@@ -206,7 +215,6 @@ export type UpdateAppointmentParams = {
     cancellationReason: string;
     durationMin: number;
   }>;
-  // İstersen dışarıdan da path geçebilirsin
   revalidatePaths?: string[];
 };
 
@@ -215,18 +223,20 @@ export const updateAppointment = async ({
   appointment,
   revalidatePaths,
 }: UpdateAppointmentParams) => {
+  const databases = getDatabases();
+
   try {
     // 1) Mevcut randevuyu al (durationMin ve diğer alanlara erişmek için)
     const existing = (await databases.getDocument(
-      DATABASE_ID!,
-      APPOINTMENT_COLLECTION_ID!,
+      DATABASE_ID(),
+      APPOINTMENT_COLLECTION_ID(),
       appointmentId
     )) as unknown as Appointment;
 
     // 2) Yeni başlangıç ve bitişi hazırla (schedule verilmişse)
     let scheduleISO: string | undefined;
     let endISO: string | undefined;
-    let duration = appointment.durationMin ?? existing.durationMin ?? 30;
+    const duration = appointment.durationMin ?? existing.durationMin ?? 30;
 
     if (appointment.schedule) {
       const start = setMilliseconds(
@@ -237,10 +247,9 @@ export const updateAppointment = async ({
       endISO = addMinutes(start, duration).toISOString();
 
       // 3) ÇAKIŞMA KONTROLÜ:
-      // Aynı 'schedule' değerine sahip, iptal olmayan ve KENDİSİ olmayan bir randevu var mı?
       const sameStart = await databases.listDocuments(
-        DATABASE_ID!,
-        APPOINTMENT_COLLECTION_ID!,
+        DATABASE_ID(),
+        APPOINTMENT_COLLECTION_ID(),
         [Query.equal("schedule", scheduleISO), Query.limit(2)]
       );
 
@@ -265,8 +274,8 @@ export const updateAppointment = async ({
 
     // 5) Güncelle
     const updated = await databases.updateDocument(
-      DATABASE_ID!,
-      APPOINTMENT_COLLECTION_ID!,
+      DATABASE_ID(),
+      APPOINTMENT_COLLECTION_ID(),
       appointmentId,
       payload
     );
@@ -277,8 +286,8 @@ export const updateAppointment = async ({
 
     // 6) DOĞRU SAYFALARI revalidate ET
     const paths = revalidatePaths ?? [
-      "/admin/appointments", // <-- Tablonun route’unu buraya koy
-      // `/admin/patient/${existing.patient}`, // hasta sayfasında da tablo varsa ekle
+      "/admin/appointments",
+      // `/admin/patient/${existing.patient}`,
     ];
     paths.forEach((p) => revalidatePath(p, "page"));
 

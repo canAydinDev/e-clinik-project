@@ -1,14 +1,15 @@
+// lib/server/getSlots.actions.ts (sizdeki yolu koruyun)
 "use server";
 
 import {
-  databases,
+  getDatabases,
   DATABASE_ID,
   APPOINTMENT_COLLECTION_ID,
   OPENING_HOURS_COLLECTION_ID,
   CLOSED_DAYS_COLLECTION_ID,
+  Query,
 } from "@/lib/server/appwrite";
 
-import { Query } from "appwrite";
 import { addMinutes, isBefore } from "date-fns";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
 
@@ -56,17 +57,20 @@ export async function getAvailableSlotsForDayAction(
   dateStr: string, // "YYYY-MM-DD" (yerel)
   durationMin: number
 ): Promise<Slot[]> {
+  const databases = getDatabases();
+  const dbId = DATABASE_ID();
+  const closedDaysCol = CLOSED_DAYS_COLLECTION_ID();
+  const openingHoursCol = OPENING_HOURS_COLLECTION_ID();
+  const appointmentCol = APPOINTMENT_COLLECTION_ID();
+
   // 1) Yerel gün 00:00 → UTC
   const dayStartUtc = fromZonedTime(`${dateStr} 00:00:00`, TZ);
   const dayEndUtc = addMinutes(dayStartUtc, 24 * 60);
 
   // 2) Kapalı gün mü?
-  const closed = await databases.listDocuments(
-    DATABASE_ID!,
-    CLOSED_DAYS_COLLECTION_ID, // process.env ... yerine bu
-    [Query.equal("date", dateStr)]
-  );
-
+  const closed = await databases.listDocuments(dbId, closedDaysCol, [
+    Query.equal("date", dateStr),
+  ]);
   if (closed.total > 0) return [];
 
   // 3) Haftanın günü (1=Mon..7=Sun) ve opening_hours kaydını al
@@ -74,13 +78,12 @@ export async function getAvailableSlotsForDayAction(
   const js = localDayStart.getDay(); // 0=Sun..6=Sat
   const weekday = ((js + 6) % 7) + 1;
 
-  const ohRes = await databases.listDocuments(
-    DATABASE_ID!,
-    OPENING_HOURS_COLLECTION_ID, // process.env ... yerine bu
-    [Query.equal("weekday", weekday)]
-  );
+  const ohRes = await databases.listDocuments(dbId, openingHoursCol, [
+    Query.equal("weekday", weekday),
+  ]);
   const ohDoc = (ohRes.documents?.[0] ??
     null) as unknown as Partial<OpeningHoursDoc> | null;
+
   if (
     !ohDoc ||
     typeof ohDoc.open !== "string" ||
@@ -93,22 +96,18 @@ export async function getAvailableSlotsForDayAction(
   // 4) Çalışma aralığı (UTC)
   const workStartUtc = addMinutes(dayStartUtc, parseHHMM(ohDoc.open));
   const workEndUtc = addMinutes(dayStartUtc, parseHHMM(ohDoc.close));
-  if (workEndUtc <= workStartUtc) return []; // kapalı gün (örn "00:00"-"00:00")
+  if (workEndUtc <= workStartUtc) return []; // kapalı veya geçersiz aralık
 
   // 5) Mevcut randevuları çek (iptaller hariç)
-  const appts = await databases.listDocuments(
-    DATABASE_ID!,
-    APPOINTMENT_COLLECTION_ID, // artık string tipinde
-    [
-      Query.between(
-        "schedule",
-        dayStartUtc.toISOString(),
-        dayEndUtc.toISOString()
-      ),
-      Query.notEqual("status", "cancelled"),
-      Query.orderAsc("schedule"),
-    ]
-  );
+  const appts = await databases.listDocuments(dbId, appointmentCol, [
+    Query.between(
+      "schedule",
+      dayStartUtc.toISOString(),
+      dayEndUtc.toISOString()
+    ),
+    Query.notEqual("status", "cancelled"),
+    Query.orderAsc("schedule"),
+  ]);
 
   const busyFromAppointments: Block[] = (
     appts.documents as unknown as Array<{

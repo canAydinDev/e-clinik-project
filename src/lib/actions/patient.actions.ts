@@ -1,27 +1,51 @@
+// lib/server/patient.actions.ts
 "use server";
 
 import {
+  getDatabases,
+  getUsers,
   DATABASE_ID,
   PATIENT_COLLECTION_ID,
-  PROJECT_ID,
-  NEXT_PUBLIC_BUCKET_ID,
-  NEXT_PUBLIC_ENDPOINT,
-  databases,
-  users,
   ID,
   Query,
-} from "@/lib/server/appwrite"; // ← InputFile kaldırıldı
-
+} from "@/lib/server/appwrite";
 import { API_KEY } from "../appwrite.config";
 import { parseStringify } from "../utils";
-import { Users, Client } from "node-appwrite";
 
+/* =====================
+   Tipler (minimal)
+   ===================== */
+export interface CreateUserParams {
+  email: string;
+  phone?: string | null;
+  password: string;
+  name: string;
+}
+
+export type RegisterUserParams = {
+  /** Yüz fotoğrafı yüklemek için opsiyonel FormData */
+  face?: FormData | null;
+} & Record<string, unknown>;
+
+export interface PatientUpdate {
+  name?: string;
+  age?: number;
+  address?: string;
+  // ihtiyaca göre alan ekleyin...
+}
+
+type UploadedFileResponse = { $id: string } & Record<string, unknown>;
+
+/* =====================
+   Users (Appwrite Users)
+   ===================== */
 export const createUser = async (user: CreateUserParams) => {
+  const users = getUsers();
   try {
     const newUser = await users.create(
       ID.unique(),
       user.email,
-      user.phone,
+      user.phone ?? undefined,
       user.password,
       user.name
     );
@@ -32,6 +56,7 @@ export const createUser = async (user: CreateUserParams) => {
 };
 
 export const getUser = async (userId: string) => {
+  const users = getUsers();
   try {
     const user = await users.get(userId);
     return parseStringify(user);
@@ -41,18 +66,11 @@ export const getUser = async (userId: string) => {
 };
 
 export const getUserByUsername = async (username: string) => {
+  const users = getUsers();
   try {
-    const client = new Client()
-      .setEndpoint(process.env.APPWRITE_ENDPOINT!)
-      .setProject(process.env.APPWRITE_PROJECT_ID!)
-      .setKey(process.env.APPWRITE_API_KEY!);
-
-    const users = new Users(client);
-
+    // node-appwrite: Users.list(queries?, search?)
     const result = await users.list([], username);
-
-    const user = result.users.find((user) => user.name === username);
-
+    const user = result.users.find((u) => u.name === username);
     return user || null;
   } catch (error) {
     console.error("Kullanıcı getirme hatası:", error);
@@ -61,6 +79,7 @@ export const getUserByUsername = async (username: string) => {
 };
 
 export const getAllUsers = async () => {
+  const users = getUsers();
   try {
     const allUsers = await users.list();
     return parseStringify(allUsers);
@@ -68,33 +87,37 @@ export const getAllUsers = async () => {
     console.log(error);
   }
 };
+
+/* =====================
+   Patients (Databases)
+   ===================== */
 export const getPatient = async (userId: string) => {
+  const databases = getDatabases();
   try {
     const patients = await databases.listDocuments(
-      DATABASE_ID!,
-      PATIENT_COLLECTION_ID!,
+      DATABASE_ID(),
+      PATIENT_COLLECTION_ID(),
       [Query.equal("patientId", userId)]
     );
 
     if (patients.documents.length === 0) {
-      return null; // ❗ Hasta yoksa null dön
+      return null;
     }
-
     return parseStringify(patients.documents[0]);
   } catch (error) {
     console.log(error);
-    return null; // ❗ Hata durumunda null dön
+    return null;
   }
 };
 
 export const getPatientById = async (documentId: string) => {
+  const databases = getDatabases();
   try {
     const patient = await databases.getDocument(
-      DATABASE_ID!,
-      PATIENT_COLLECTION_ID!,
-      documentId // 🔥 Doğrudan document ID ile sorguluyorsun
+      DATABASE_ID(),
+      PATIENT_COLLECTION_ID(),
+      documentId
     );
-
     return patient;
   } catch (error) {
     console.log(error);
@@ -106,47 +129,58 @@ export const registerPatient = async ({
   face,
   ...patient
 }: RegisterUserParams) => {
+  const databases = getDatabases();
+
   try {
-    let fileResponse;
+    let fileResponse: UploadedFileResponse | undefined;
 
     // Dosya varsa Appwrite REST API ile yükle
     if (face) {
-      const fileBlob = face.get("blobFile") as File;
-      const arrayBuffer = await fileBlob.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-      const fileName = face.get("fileName") as string;
+      const fileBlob = face.get("blobFile") as File | null;
+      const fileName = (face.get("fileName") as string | null) ?? "face.jpg";
 
-      // 🔥 Tip uyumsuzluk olmaması için buffer'ı Blob içine sarıyoruz
-      const blob = new Blob([buffer], { type: fileBlob.type });
+      if (fileBlob) {
+        const arrayBuffer = await fileBlob.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        const blob = new Blob([buffer], { type: fileBlob.type });
 
-      const form = new FormData();
-      form.append("fileId", "unique()");
-      form.append("file", blob, fileName); // ✅ artık geçerli
+        const form = new FormData();
+        form.append("fileId", "unique()");
+        form.append("file", blob, fileName);
 
-      const res = await fetch(
-        `${NEXT_PUBLIC_ENDPOINT}/storage/buckets/${NEXT_PUBLIC_BUCKET_ID}/files`,
-        {
-          method: "POST",
-          headers: {
-            "X-Appwrite-Project": PROJECT_ID!,
-            "X-Appwrite-Key": API_KEY!,
-          },
-          body: form,
-        }
-      );
+        const ENDPOINT = process.env.NEXT_PUBLIC_ENDPOINT!;
+        const BUCKET_ID = process.env.NEXT_PUBLIC_BUCKET_ID!;
+        const PROJECT_ID = process.env.PROJECT_ID!;
 
-      fileResponse = await res.json();
+        const res = await fetch(
+          `${ENDPOINT}/storage/buckets/${BUCKET_ID}/files`,
+          {
+            method: "POST",
+            headers: {
+              "X-Appwrite-Project": PROJECT_ID,
+              "X-Appwrite-Key": API_KEY!,
+            },
+            body: form,
+          }
+        );
+
+        fileResponse = (await res.json()) as UploadedFileResponse;
+      }
     }
 
     // Hasta kaydını oluştur
+    const ENDPOINT = process.env.NEXT_PUBLIC_ENDPOINT!;
+    const BUCKET_ID = process.env.NEXT_PUBLIC_BUCKET_ID!;
+    const PROJECT_ID = process.env.PROJECT_ID!;
+
     const newPatient = await databases.createDocument(
-      DATABASE_ID!,
-      PATIENT_COLLECTION_ID!,
+      DATABASE_ID(),
+      PATIENT_COLLECTION_ID(),
       ID.unique(),
       {
-        faceId: fileResponse?.$id || null,
+        faceId: fileResponse?.$id ?? null,
         faceUrl: fileResponse?.$id
-          ? `${NEXT_PUBLIC_ENDPOINT}/storage/buckets/${NEXT_PUBLIC_BUCKET_ID}/files/${fileResponse.$id}/view?project=${PROJECT_ID}`
+          ? `${ENDPOINT}/storage/buckets/${BUCKET_ID}/files/${fileResponse.$id}/view?project=${PROJECT_ID}`
           : null,
         ...patient,
       }
@@ -159,10 +193,11 @@ export const registerPatient = async ({
 };
 
 export const getAllPatients = async () => {
+  const databases = getDatabases();
   try {
     const patients = await databases.listDocuments(
-      DATABASE_ID!,
-      PATIENT_COLLECTION_ID!
+      DATABASE_ID(),
+      PATIENT_COLLECTION_ID()
     );
 
     return parseStringify(patients.documents);
@@ -172,13 +207,17 @@ export const getAllPatients = async () => {
   }
 };
 
-export const updatePatient = async (documentId: string, updatedData: any) => {
+export const updatePatient = async (
+  documentId: string,
+  updatedData: PatientUpdate
+) => {
+  const databases = getDatabases();
   try {
     const updatedPatient = await databases.updateDocument(
-      DATABASE_ID!,
-      PATIENT_COLLECTION_ID!,
+      DATABASE_ID(),
+      PATIENT_COLLECTION_ID(),
       documentId,
-      updatedData // 🔥 Sadece değişecek alanları gönder
+      updatedData as Record<string, unknown>
     );
 
     return parseStringify(updatedPatient);
@@ -189,14 +228,15 @@ export const updatePatient = async (documentId: string, updatedData: any) => {
 };
 
 export const deletePatient = async (documentId: string) => {
+  const databases = getDatabases();
   try {
     await databases.deleteDocument(
-      DATABASE_ID!,
-      PATIENT_COLLECTION_ID!,
+      DATABASE_ID(),
+      PATIENT_COLLECTION_ID(),
       documentId
     );
 
-    return true; // ✅ Başarıyla silindiyse true döner
+    return true;
   } catch (error) {
     console.log("Hasta silinirken hata:", error);
     return false;
