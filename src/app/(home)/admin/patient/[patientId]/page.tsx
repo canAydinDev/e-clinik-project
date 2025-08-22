@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { getPatientById } from "@/lib/actions/patient.actions";
 import { ExaminationHomePage } from "@/modules/ui/components/admin-page/examination-page/examination-ana-homepage";
+import { PatientDetailPage } from "@/modules/ui/components/patient-page/patient-detail-page";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -85,23 +86,31 @@ const Patient = async ({ params }: PatientProps) => {
           )}
         </div>
       </div>
-      <div className="flex flex-col lg:flex-row justify-start items-start">
-        <div className="flex flex-[2]">
-          <ExaminationHomePage patientId={patientId} />
+      <div className="flex flex-col lg:flex-row gap-3 lg:gap-0  ">
+        <div className="flex lg:flex-[1]">
+          <PatientDetailPage patientId={patientId} />
         </div>
-        <div className="flex flex-[1] flex-col gap-2 items-start mt-5  ">
-          <div>
-            <Button asChild variant="elevated">
-              <Link href={`/admin/examinations/${patientId}/newexamination`}>
-                Yeni Muayene
-              </Link>
-            </Button>
+        <div className="flex flex-col lg:flex-[2]">
+          <div className="flex">
+            <ExaminationHomePage patientId={patientId} />
           </div>
 
-          <div>
-            <Button asChild variant="elevated">
-              <Link href={`/admin/appointments/${patientId}`}>Randevu Al</Link>
-            </Button>
+          <div className="flex  flex-row gap-2 items-center justify-center mt-5  ">
+            <div>
+              <Button asChild variant="elevated">
+                <Link href={`/admin/examinations/${patientId}/newexamination`}>
+                  Yeni Muayene
+                </Link>
+              </Button>
+            </div>
+
+            <div>
+              <Button asChild variant="elevated">
+                <Link href={`/admin/appointments/${patientId}`}>
+                  Randevu Al
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </div>

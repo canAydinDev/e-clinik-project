@@ -14,6 +14,7 @@ export const SubmitButton = ({
 }: ButtonProps) => {
   return (
     <Button
+      variant="greenElevated"
       type="submit"
       disabled={isLoading}
       className={className ?? "shad-primary-btn w-full"}
