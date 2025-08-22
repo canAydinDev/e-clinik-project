@@ -9,6 +9,27 @@ interface PatientProps {
 }
 
 const Patient = async ({ params }: PatientProps) => {
+  function extractDobISO(obj: unknown): string | null {
+    if (!obj || typeof obj !== "object") return null;
+    const rec = obj as Record<string, unknown>;
+    const keys = ["birthDate", "dateOfBirth", "dob"] as const;
+    for (const k of keys) {
+      const v = rec[k];
+      if (typeof v === "string" && v.trim().length > 0) return v;
+    }
+    return null;
+  }
+
+  function calcAgeFromISO(dobISO: string): number | null {
+    const dob = new Date(dobISO);
+    if (Number.isNaN(dob.getTime())) return null;
+    const now = new Date();
+    let age = now.getFullYear() - dob.getFullYear();
+    const m = now.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && now.getDate() < dob.getDate())) age--;
+    return age >= 0 ? age : null;
+  }
+
   const { patientId } = await params;
   const patient = await getPatientById(patientId);
 
@@ -16,17 +37,39 @@ const Patient = async ({ params }: PatientProps) => {
     return <div>Hasta bulunamadı.</div>;
   }
 
+  const dobISO = extractDobISO(patient);
+  const age = dobISO ? calcAgeFromISO(dobISO) : null;
+
   return (
-    <div className="flex flex-col justify-between mx-4 mt-4  p-3">
-      <div className="flex flex-row justify-between items-center mb-5 mx-5  min-h-[50px] px-5 ">
-        <div>
-          <Link
-            className="font-bold text-xl"
-            href={`/admin/patient/${patientId}`}
-          >
-            {patient.name}
-          </Link>
+    <div className="flex flex-col justify-between mx-4  p-3">
+      <div className="flex flex-row justify-between items-center mb-5  min-h-[50px] px-5 ">
+        <div className="flex flex-col justify-center items-center">
+          <div>
+            <Link
+              className="font-bold text-xl"
+              href={`/admin/patient/${patientId}`}
+              title={
+                dobISO
+                  ? `Doğum tarihi: ${new Date(dobISO).toLocaleDateString(
+                      "tr-TR"
+                    )}`
+                  : undefined
+              }
+            >
+              {patient.name}
+            </Link>
+          </div>
+          <div className="flex flex-col justify-center items-start ml-5 mt-2 ">
+            <div>
+              {" "}
+              {typeof age === "number" && (
+                <span className=" text-base text-gray-600">Yaş: {age}</span>
+              )}
+            </div>
+            <div>TC: {patient.identificationNumber}</div>
+          </div>
         </div>
+
         <div>
           {patient.faceUrl ? (
             <Image

@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { patientColumns } from "@/modules/ui/components/table/patient-columns";
 import { AdminPatientDataTable } from "../../table/admin-patient-table";
-import { SearchInput } from "../../search-input";
+import { SearchInput } from "../../search-filter/search-input";
 
 export const AdminPatientsHomePage = () => {
   const trpc = useTRPC();

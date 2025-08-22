@@ -68,7 +68,9 @@ export function ExaminationDataTable({
                 key={row.id}
                 className="hover:bg-gray-50 cursor-pointer"
                 onClick={() =>
-                  router.push(`/admin/examination/${row.original.$id}`)
+                  router.push(
+                    `/admin/examination/${encodeURIComponent(row.original.$id)}`
+                  )
                 }
               >
                 {row.getVisibleCells().map((cell) => (

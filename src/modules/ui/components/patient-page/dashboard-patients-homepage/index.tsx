@@ -4,7 +4,7 @@ import { useTRPC } from "@/trpc/client";
 import { useQuery } from "@tanstack/react-query";
 
 import { patientColumns } from "@/modules/ui/components/table/patient-columns";
-import { SearchInput } from "../../search-input";
+import { SearchInput } from "../../search-filter/search-input";
 
 import { UserPatientDataTable } from "../../table/user-patient-table";
 

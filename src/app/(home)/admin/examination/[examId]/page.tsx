@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { DeleteExaminationButton } from "@/modules/ui/components/admin-page/examination-page/delete-examination";
 import type { Patient } from "../../../../../../types/appwrite.types";
+import { asId } from "@/modules/ui/functions";
 
 const Page = async ({
   params,
@@ -28,7 +29,7 @@ const Page = async ({
   const dbId = DATABASE_ID();
   const patientColId = PATIENT_COLLECTION_ID();
 
-  const patientId: string = exam.patientId;
+  const patientId = asId(exam.patientId);
 
   let patient: Patient | null = null;
   try {
@@ -43,7 +44,7 @@ const Page = async ({
       <div className="flex flex-row justify-between items-center mb-5 mx-5">
         <div>
           <Link
-            href={`/admin/patient/${patient ? patient.$id : patientId}`}
+            href={`/admin/patient/${encodeURIComponent(patientId)}`}
             className="font-bold text-xl"
           >
             {patient?.name ?? "Hasta"}
@@ -86,7 +87,7 @@ const Page = async ({
 
           <DeleteExaminationButton
             examinationId={examId}
-            redirectTo={`/admin/patient/${patient ? patient.$id : patientId}`}
+            redirectTo={`/admin/patient/${encodeURIComponent(patientId)}`}
           />
         </div>
       </div>
