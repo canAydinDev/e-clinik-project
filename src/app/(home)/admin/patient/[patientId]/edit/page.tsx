@@ -7,7 +7,7 @@ export default async function Page({
   params,
 }: {
   // Hem sync hem async params ile uyumlu
-  params: { patientId: string } | Promise<{ patientId: string }>;
+  params: Promise<{ patientId: string }>;
 }) {
   // ⬇️ sync/async fark etmeksizin güvenli
   const { patientId } = await Promise.resolve(params);
