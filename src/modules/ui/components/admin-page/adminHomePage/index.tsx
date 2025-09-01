@@ -4,10 +4,10 @@ import { AdminAppointmentPage } from "../admin-appointment-page";
 export const AdminHomePage = () => {
   return (
     <section className="flex flex-col xl:flex-row mt-10 gap-1">
-      <div className="flex  ">
+      <div className="flex w-full  ">
         <AdminPatientsHomePage />
       </div>
-      <div className="flex ">
+      <div className="flex w-full">
         <AdminAppointmentPage />
       </div>
     </section>

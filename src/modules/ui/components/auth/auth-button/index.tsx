@@ -1,36 +1,57 @@
 "use client";
 
 import {
-  UserButton,
-  SignInButton,
   SignedIn,
   SignedOut,
+  SignInButton,
+  useUser,
   useClerk,
 } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
-import { UserCircleIcon, LogOut } from "lucide-react";
+import { LogOut, UserCircleIcon } from "lucide-react";
 import { logout } from "@/lib/client/auth";
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 export const AuthButton = () => {
+  const { user } = useUser();
   const { signOut } = useClerk();
 
   const handleLogout = async () => {
-    await logout(); // kendi logout fonksiyonun
-    await signOut(); // clerk çıkışı
+    await logout(); // sizin local logout
+    await signOut(); // Clerk çıkışı
   };
 
   return (
     <>
       <SignedIn>
-        <UserButton>
-          <UserButton.MenuItems>
-            <UserButton.Action
-              label="Çıkış Yap"
-              labelIcon={<LogOut className="size-4" />}
-              onClick={handleLogout}
-            />
-          </UserButton.MenuItems>
-        </UserButton>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              aria-label="Hesap menüsü"
+              className="rounded-full outline-none focus:ring-2 focus:ring-primary/40"
+            >
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={user?.imageUrl || undefined} />
+                <AvatarFallback>
+                  {(user?.firstName?.[0] || "U") + (user?.lastName?.[0] || "")}
+                </AvatarFallback>
+              </Avatar>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="min-w-[160px]">
+            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+              <LogOut className="mr-2 h-4 w-4" />
+              Çıkış Yap
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </SignedIn>
 
       <SignedOut>

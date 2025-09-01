@@ -3,16 +3,13 @@ import { UsersDetailsPage } from "@/modules/ui/components/admin-page/users-detai
 
 const Page = () => {
   return (
-    <div className="flex flex-row mx-5 justify-between items-center ">
-      <div className="flex-1 ">
+    <div className="flex flex-col lg:flex-row mx-5 justify-between items-center ">
+      <div className=" flex-1 lg:flex-1 w-full">
         <UserManagementPage />
       </div>
-      <div className="flex-5 ">
-        <div>
-          <h1>Tum Kullanicilar</h1>
-          <div>
-            <UsersDetailsPage />
-          </div>
+      <div className="flex-1 lg:flex-3 w-full ">
+        <div className=" mx-2 ">
+          <UsersDetailsPage />
         </div>
       </div>
     </div>

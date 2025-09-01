@@ -47,10 +47,12 @@ export const UserRegistrationForm = () => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 flex-1">
-        <section className="mb-12 space-y-4">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-6 flex-1 m-3"
+      >
+        <section className="mb-2 space-y-4 ">
           <h1>Yeni Kayıt</h1>
-          <p>Yeni kayıt yapabilirsiniz</p>
         </section>
 
         <CustomFormField<UserFormData>
@@ -58,7 +60,7 @@ export const UserRegistrationForm = () => {
           control={form.control}
           name="name"
           label="İsminiz"
-          placeholder="Can Aydin"
+          placeholder="Adı Soyadı"
           iconSrc="/assets/icons/user-2.svg"
           iconAlt="isim"
         />
