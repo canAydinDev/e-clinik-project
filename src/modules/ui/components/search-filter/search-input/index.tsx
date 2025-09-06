@@ -21,7 +21,7 @@ export const SearchInput = ({ value, onChange, onSubmit, loading }: Props) => {
   );
 
   return (
-    <form className="flex w-full max-w-[600px] mb-3" onSubmit={handleSubmit}>
+    <form className="flex w-full max-w-[700px] mb-3" onSubmit={handleSubmit}>
       <div className="relative w-full">
         <input
           type="text"

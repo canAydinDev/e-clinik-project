@@ -184,7 +184,7 @@ export default function UpdatePatientForm({
             control={form.control}
             name="allergies"
             label="Alerjiler"
-            placeholder={initialValues.allergies || "Yer fıstığı..."}
+            placeholder={initialValues.allergies || "Allerjileri ekle..."}
           />
           <CustomFormField<UpdatePatientValues>
             fieldType={FormFieldType.TEXTAREA}
@@ -192,7 +192,7 @@ export default function UpdatePatientForm({
             name="currentMedication"
             label="Kullanılan İlaçlar"
             placeholder={
-              initialValues.currentMedication || "Paracetamol 500mg..."
+              initialValues.currentMedication || "Ilaclari ekleyin..."
             }
           />
           <CustomFormField<UpdatePatientValues>
@@ -207,7 +207,9 @@ export default function UpdatePatientForm({
             control={form.control}
             name="pastMedicalHistory"
             label="Geçmiş Tıbbi Öykü"
-            placeholder={initialValues.pastMedicalHistory || "Apendektomi..."}
+            placeholder={
+              initialValues.pastMedicalHistory || "Apendektomi gibi..."
+            }
           />
         </div>
 

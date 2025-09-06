@@ -19,11 +19,8 @@ export const AdminPatientsHomePage = () => {
 
   return (
     <div className="w-full flex flex-col gap-6 mx-5">
-      {/* max-w-7xl KALDIRILDI */}
       <main className="w-full flex flex-row items-stretch gap-2">
-        {/* px-[5%] ve xl:px-12 KALDIRILDI */}
         <div className="flex-1 min-w-0">
-          {/* flex-5 yerine flex-1 + min-w-0 */}
           <SearchInput
             value={input}
             onChange={setInput}
@@ -31,8 +28,7 @@ export const AdminPatientsHomePage = () => {
             loading={patients.isFetching}
           />
 
-          <div className="w-full overflow-x-auto">
-            {/* geniş tablo için taşmayı engeller */}
+          <div className="w-full overflow-x-auto items-stretch">
             <AdminPatientDataTable
               columns={patientColumns}
               data={patients.data ?? []}

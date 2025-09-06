@@ -2,6 +2,7 @@
 "use server";
 
 import { buildPatientSearchText, toISO } from "@/lib/text/normalize";
+import { revalidatePath } from "next/cache";
 
 import {
   getDatabases,
@@ -13,6 +14,7 @@ import {
 } from "@/lib/server/appwrite";
 import { API_KEY } from "../appwrite.config";
 import { parseStringify } from "../utils";
+import { deleteAppointmentsByPatient } from "./appointment.actions";
 
 /* =====================
    Tipler (minimal)
@@ -357,77 +359,89 @@ export const updatePatient2 = async (
   }
 };
 
+type PatientUpdateInput = Partial<{
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  occupation: string;
+  emergencyContactName: string;
+  emergencyContactNumber: string;
+  allergies: string;
+  currentMedication: string;
+  familyMedicalHistory: string;
+  pastMedicalHistory: string;
+  identificationNumber: string;
+  birthDate: string | Date; // Form Date ise burada Date, yoksa ISO string
+}>;
+
 export const updatePatient = async (
   documentId: string,
-  updatedData: PatientUpdate
+  updatedData: PatientUpdateInput
 ) => {
   const databases = getDatabases();
+
   try {
-    // mevcut hasta
     const current = await databases.getDocument(
       DATABASE_ID(),
       PATIENT_COLLECTION_ID(),
       documentId
     );
 
-    // güncellemede gelebilecek alanlar
-    const nextName =
-      typeof updatedData.name === "string"
-        ? updatedData.name
-        : (current.name as string | undefined);
-
-    const nextEmail =
-      typeof (updatedData as { email?: string }).email === "string"
-        ? (updatedData as { email?: string }).email
-        : (current.email as string | undefined);
-
-    const nextPhone =
-      typeof (updatedData as { phone?: string }).phone === "string"
-        ? (updatedData as { phone?: string }).phone
-        : (current.phone as string | undefined);
-
-    const nextIdNo =
-      typeof (updatedData as { identificationNumber?: string })
-        .identificationNumber === "string"
-        ? (updatedData as { identificationNumber?: string })
-            .identificationNumber
-        : (current.identificationNumber as string | undefined);
-
-    const nextAddress =
-      typeof (updatedData as { address?: string }).address === "string"
-        ? (updatedData as { address?: string }).address
-        : (current.address as string | undefined);
-
-    // searchText tekrar
-    const nextSearchText = buildPatientSearchText({
-      name: nextName,
-      email: nextEmail,
-      phone: nextPhone,
-      identificationNumber: nextIdNo,
-      address: nextAddress,
-    });
-
-    // Appwrite update payload (yalnızca şemadaki anahtarlar)
-    const payload: Record<string, unknown> = {
-      ...(updatedData.name !== undefined ? { name: updatedData.name } : {}),
-      ...(updatedData.address !== undefined
-        ? { address: updatedData.address }
-        : {}),
-      ...(updatedData.age !== undefined ? { age: updatedData.age } : {}),
-
-      // varsa diğer alanlarınız için benzer kontrol ekleyin…
-
-      searchText: nextSearchText,
+    // 1) searchText için birleşik değerleri hazırla (gelen varsa onu, yoksa mevcut)
+    const merged = {
+      name: updatedData.name ?? (current.name as string | undefined),
+      email: updatedData.email ?? (current.email as string | undefined),
+      phone: updatedData.phone ?? (current.phone as string | undefined),
+      address: updatedData.address ?? (current.address as string | undefined),
+      identificationNumber:
+        updatedData.identificationNumber ??
+        (current.identificationNumber as string | undefined),
     };
 
-    const updatedPatient = await databases.updateDocument(
+    // 2) Appwrite'a sadece GÖNDERİLEN alanları yolla
+    const payload: Record<string, unknown> = {};
+    const keys: (keyof PatientUpdateInput)[] = [
+      "name",
+      "email",
+      "phone",
+      "address",
+      "occupation",
+      "emergencyContactName",
+      "emergencyContactNumber",
+      "allergies",
+      "currentMedication",
+      "familyMedicalHistory",
+      "pastMedicalHistory",
+      "identificationNumber",
+      "birthDate",
+    ];
+
+    for (const k of keys) {
+      const v = updatedData[k];
+      if (v !== undefined) {
+        payload[k] =
+          k === "birthDate" && v instanceof Date ? v.toISOString() : v;
+      }
+    }
+
+    // 3) searchText'i her güncellemede yeniden üret
+    payload.searchText = buildPatientSearchText({
+      name: merged.name,
+      email: merged.email,
+      phone: merged.phone,
+      identificationNumber: merged.identificationNumber,
+      address: merged.address,
+    });
+
+    const updated = await databases.updateDocument(
       DATABASE_ID(),
       PATIENT_COLLECTION_ID(),
       documentId,
       payload
     );
 
-    return parseStringify(updatedPatient);
+    return parseStringify(updated);
   } catch (error) {
     console.log("Hasta güncellenirken hata:", error);
     return null;
@@ -437,11 +451,19 @@ export const updatePatient = async (
 export const deletePatient = async (documentId: string) => {
   const databases = getDatabases();
   try {
+    // 1) Bu hastaya bağlı tüm randevuları sil
+    await deleteAppointmentsByPatient(documentId);
+
+    // 2) Hastayı sil
     await databases.deleteDocument(
       DATABASE_ID(),
       PATIENT_COLLECTION_ID(),
       documentId
     );
+
+    // 3) İlgili sayfaları tazele (opsiyonel)
+    revalidatePath("/admin/appointments", "page");
+    revalidatePath("/admin", "page");
 
     return true;
   } catch (error) {

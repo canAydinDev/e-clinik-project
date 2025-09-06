@@ -60,7 +60,7 @@ const Patient = async ({ params }: PatientProps) => {
               {patient.name}
             </Link>
           </div>
-          <div className="flex flex-col justify-center items-start ml-5 mt-2 ">
+          <div className="flex flex-col justify-center items-start  mt-2 w-full ">
             <div>
               {" "}
               {typeof age === "number" && (

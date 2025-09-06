@@ -2,6 +2,7 @@ import { getPatientById } from "@/lib/actions/patient.actions";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { DeletePatientButton } from "../delete-patient-button";
 
 interface PatientDetailProps {
   patientId: string;
@@ -145,6 +146,12 @@ export const PatientDetailPage = async ({ patientId }: PatientDetailProps) => {
             Bilgileri Güncelle
           </Link>
         </Button>
+      </div>
+      <div className="flex w-full p-2">
+        <DeletePatientButton
+          patientId={patient.$id ?? patientId}
+          redirectTo="/admin" // dilediğiniz route
+        />
       </div>
     </div>
   );

@@ -297,3 +297,66 @@ export const updateAppointment = async ({
     return { error: "UNKNOWN" } as const;
   }
 };
+
+export async function deleteAppointment(appointmentId: string) {
+  const databases = getDatabases();
+  try {
+    await databases.deleteDocument(
+      DATABASE_ID(),
+      APPOINTMENT_COLLECTION_ID(),
+      appointmentId
+    );
+    // Randevu listelerini tazele
+    revalidatePath("/admin/appointments", "page");
+    return true;
+  } catch (err) {
+    console.error("Randevu silinemedi:", err);
+    return false;
+  }
+}
+
+export async function deleteAppointmentsByPatient(patientId: string) {
+  const databases = getDatabases();
+
+  const limit = 100;
+  let cursor: string | undefined;
+  let total = 0;
+
+  while (true) {
+    const queries = [Query.equal("patient", patientId), Query.limit(limit)];
+    if (cursor) queries.push(Query.cursorAfter(cursor));
+
+    const page = await databases.listDocuments(
+      DATABASE_ID(),
+      APPOINTMENT_COLLECTION_ID(),
+      queries
+    );
+
+    type Doc = { $id: string };
+    const docs = (page.documents ?? []) as Doc[];
+
+    if (docs.length === 0) break;
+
+    await Promise.allSettled(
+      docs.map((d) =>
+        databases.deleteDocument(
+          DATABASE_ID(),
+          APPOINTMENT_COLLECTION_ID(),
+          d.$id
+        )
+      )
+    );
+
+    total += docs.length;
+
+    // ⬇️ Güvenli "son" eleman alma
+    const last = docs.at(-1);
+    if (!last) break; // TS artık 'last' için undefined ihtimalini biliyor
+    cursor = last.$id;
+
+    if (docs.length < limit) break;
+  }
+
+  revalidatePath("/admin/appointments", "page");
+  return total;
+}

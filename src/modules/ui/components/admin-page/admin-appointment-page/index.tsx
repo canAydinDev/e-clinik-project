@@ -5,26 +5,23 @@ import { columns } from "@/modules/ui/components/table/columns";
 
 import { DataTable } from "../../table/data-table";
 
+// AdminAppointmentPage (server component)
 export const AdminAppointmentPage = async () => {
   const appointments = await getRecentAppointmentList();
+
   return (
-    <div className="mx-auto flex max-w-7xl flex-col space-y-14">
-      <main className="flex flex-col items-center space-y-6 px-[5%] pb-12 xl:space-y-12 xl:px-12">
-        <section className="flex w-full flex-col justify-between gap-5 sm:flex-row xl:gap-10">
+    <div className="w-full flex flex-col gap-6 mx-5 min-w-0">
+      {/* max-w-7xl ve mx-auto kaldırıldı */}
+      <main className="w-full flex flex-col gap-6">
+        {/* items-center yerine varsayılan: stretch */}
+        {/* Kartlar da tam genişlikte ve responsive olsun */}
+        <section className="w-full grid grid-cols-1 sm:grid-cols-2 gap-4">
           <StatCard
             type="appointments"
             count={appointments.scheduledCount}
             label="Planlanmış Randevular"
             icon="/assets/icons/appointments.svg"
           />
-
-          <StatCard
-            type="pending"
-            count={appointments.pendingCount}
-            label="Bekleyen Randevular"
-            icon="/assets/icons/pending.svg"
-          />
-
           <StatCard
             type="cancelled"
             count={appointments.cancelledCount}
@@ -32,7 +29,11 @@ export const AdminAppointmentPage = async () => {
             icon="/assets/icons/cancelled.svg"
           />
         </section>
-        <DataTable columns={columns} data={appointments.documents} />
+
+        {/* Tabloyu yatayda kaydırılabilir sarmalayıcıya al */}
+        <div className="w-full overflow-x-auto">
+          <DataTable columns={columns} data={appointments.documents} />
+        </div>
       </main>
     </div>
   );
