@@ -18,8 +18,8 @@ export const AdminPatientsHomePage = () => {
   const patients = useQuery(trpc.patients.getMany.queryOptions({ q }));
 
   return (
-    <div className="w-full flex flex-col gap-6 mx-5">
-      <main className="w-full flex flex-row items-stretch gap-2">
+    <div className="w-full flex flex-col gap-6 my-3">
+      <main className="w-full flex flex-row items-stretch gap-2 ">
         <div className="flex-1 min-w-0">
           <SearchInput
             value={input}

@@ -19,13 +19,6 @@ export const AllAppointmentPage = async () => {
           />
 
           <StatCard
-            type="pending"
-            count={appointments.pendingCount}
-            label="Bekleyen Randevular"
-            icon="/assets/icons/pending.svg"
-          />
-
-          <StatCard
             type="cancelled"
             count={appointments.cancelledCount}
             label="İptal Edilen Randevular"

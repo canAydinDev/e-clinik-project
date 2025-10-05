@@ -47,7 +47,12 @@ export const Navbar = () => {
     { href: "/dashboard/appointments", children: "Randevular" },
 
     ...(userId
-      ? [{ href: `/admin/patients/${userId}/register`, children: "Yeni Kayıt" }]
+      ? [
+          {
+            href: `/dashboard/patients/${userId}/register`,
+            children: "Yeni Kayıt",
+          },
+        ]
       : []),
   ];
   return (

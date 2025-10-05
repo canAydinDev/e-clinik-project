@@ -41,7 +41,7 @@ export function AdminPatientDataTable({
 
   return (
     <div className="z-10 w-full overflow-hidden rounded-lg border border-gray-300 shadow-sm">
-      <Table className="rounded-lg overflow-hidden">
+      <Table className="rounded-lg overflow-hidden table-fixed w-full">
         <TableHeader className="bg-gray-100">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
