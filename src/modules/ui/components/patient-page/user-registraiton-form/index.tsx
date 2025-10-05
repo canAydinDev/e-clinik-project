@@ -36,7 +36,7 @@ export const UserRegistrationForm = () => {
     try {
       const user = await createUser({ name, email, phone, password });
       if (user) {
-        router.push("/admin/users-detail");
+        router.push("/admin/users");
       }
     } catch (error) {
       console.error("Kullanıcı oluşturulurken hata:", error);
