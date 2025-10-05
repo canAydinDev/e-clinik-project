@@ -15,7 +15,7 @@ export const AdminAppointmentPage = async () => {
       <main className="w-full flex flex-col gap-6">
         {/* items-center yerine varsayılan: stretch */}
         {/* Kartlar da tam genişlikte ve responsive olsun */}
-        <section className="w-full grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <section className="hidden md:flex w-full grid grid-cols-1 sm:grid-cols-2 gap-4">
           <StatCard
             type="appointments"
             count={appointments.scheduledCount}
