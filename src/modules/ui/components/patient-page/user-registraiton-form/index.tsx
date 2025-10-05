@@ -42,7 +42,6 @@ export const UserRegistrationForm = () => {
     try {
       const user = await createUser({ name, email, phone, password });
       if (user) {
-        // 🔽 users.getMany cache’ini invalid et
         const { queryKey } = trpc.users.getMany.queryOptions();
         await queryClient.invalidateQueries({ queryKey });
 
@@ -63,7 +62,10 @@ export const UserRegistrationForm = () => {
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-6 flex-1 m-3"
       >
-        {/* alanlar */}
+        <section className="mb-2 space-y-4 ">
+          <h1>Yeni Kayıt</h1>
+        </section>
+
         <CustomFormField<UserFormData>
           fieldType={FormFieldType.INPUT}
           control={form.control}
@@ -73,7 +75,41 @@ export const UserRegistrationForm = () => {
           iconSrc="/assets/icons/user-2.svg"
           iconAlt="isim"
         />
-        {/* ... diğer alanlar ... */}
+
+        <CustomFormField<UserFormData>
+          fieldType={FormFieldType.INPUT}
+          control={form.control}
+          name="email"
+          label="Email"
+          placeholder="adiniz@gmail.com"
+          iconSrc="/assets/icons/email-3.svg"
+          iconAlt="email"
+        />
+
+        <CustomFormField<UserFormData>
+          fieldType={FormFieldType.PASSWORD}
+          control={form.control}
+          name="password"
+          label="Şifre"
+          placeholder="******"
+        />
+
+        <CustomFormField<UserFormData>
+          fieldType={FormFieldType.PASSWORD}
+          control={form.control}
+          name="confirmPassword"
+          label="Şifre Tekrar"
+          placeholder="******"
+        />
+
+        <CustomFormField<UserFormData>
+          fieldType={FormFieldType.PHONE_INPUT}
+          control={form.control}
+          name="phone"
+          label="Telefon No"
+          placeholder="(555) 123-4567"
+        />
+
         <SubmitButton isLoading={isLoading}>Kaydet</SubmitButton>
       </form>
     </Form>
