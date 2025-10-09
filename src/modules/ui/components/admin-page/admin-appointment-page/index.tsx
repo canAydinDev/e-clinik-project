@@ -3,7 +3,7 @@ import { getRecentAppointmentList } from "@/lib/actions/appointment.actions";
 import { StatCard } from "../../stat-card";
 import { columns } from "@/modules/ui/components/table/columns";
 
-import { DataTable } from "../../table/data-table";
+import { DataTable2 } from "../../appointment-page/all-appointment-home-page/index-2";
 
 // AdminAppointmentPage (server component)
 export const AdminAppointmentPage = async () => {
@@ -32,7 +32,7 @@ export const AdminAppointmentPage = async () => {
 
         {/* Tabloyu yatayda kaydırılabilir sarmalayıcıya al */}
         <div className="w-full overflow-x-auto">
-          <DataTable columns={columns} data={appointments.documents} />
+          <DataTable2 columns={columns} data={appointments.documents} />
         </div>
       </main>
     </div>

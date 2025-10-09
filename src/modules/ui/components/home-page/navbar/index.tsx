@@ -56,7 +56,7 @@ export const Navbar = () => {
       : []),
   ];
   return (
-    <nav className="h-20 flex border-b justify-between font-medium bg-white mr-5">
+    <nav className="h-20 flex border-b justify-between font-medium bg-[#e6ddde] pr-5">
       <div className="flex items-center w-full gap-4 justify-between">
         <Link href="/dashboard" className="pl-6 my-auto flex items-center">
           <span
@@ -65,7 +65,7 @@ export const Navbar = () => {
               playFair.className
             )}
           >
-            MyKlinik
+            SahinKlinik
           </span>
         </Link>
         <NavbarSidebar

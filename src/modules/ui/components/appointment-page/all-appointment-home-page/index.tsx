@@ -3,7 +3,7 @@ import { getRecentAppointmentList } from "@/lib/actions/appointment.actions";
 import { StatCard } from "../../stat-card";
 import { columns } from "@/modules/ui/components/table/columns";
 
-import { DataTable } from "../../table/data-table";
+import { DataTable2 } from "./index-2";
 
 export const AllAppointmentPage = async () => {
   const appointments = await getRecentAppointmentList();
@@ -25,7 +25,7 @@ export const AllAppointmentPage = async () => {
             icon="/assets/icons/cancelled.svg"
           />
         </section>
-        <DataTable columns={columns} data={appointments.documents} />
+        <DataTable2 columns={columns} data={appointments.documents} />
       </main>
     </div>
   );

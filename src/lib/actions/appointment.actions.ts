@@ -360,3 +360,24 @@ export async function deleteAppointmentsByPatient(patientId: string) {
   revalidatePath("/admin/appointments", "page");
   return total;
 }
+
+export const getPatientAppointmentList = async (patientId: string) => {
+  const databases = getDatabases();
+  // noStore(); // Dinamik sayfalar için genellikle noStore kullanılır, ihtiyaca göre aktif edilebilir.
+
+  try {
+    const appointments = await databases.listDocuments(
+      DATABASE_ID(),
+      APPOINTMENT_COLLECTION_ID(),
+      [
+        Query.equal("patient", patientId), // Sadece bu hastaya ait olanları filtrele
+        Query.orderDesc("$createdAt"),
+      ]
+    );
+
+    return parseStringify(appointments);
+  } catch (error) {
+    console.error(`Hastanın randevuları çekilirken bir hata oluştu: ${error}`);
+    return null; // Hata durumunda null dönebiliriz
+  }
+};

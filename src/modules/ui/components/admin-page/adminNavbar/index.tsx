@@ -48,7 +48,7 @@ export const AdminNavbar = () => {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   return (
-    <nav className="h-15 md:h-20 flex  justify-between font-medium mx-5 border-b">
+    <nav className="h-15 md:h-20 flex  justify-between font-medium px-5 border-b bg-[#e6ddde]">
       <Link href="/admin" className="pl-6 my-auto flex items-center">
         <span
           className={cn(

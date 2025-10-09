@@ -58,8 +58,8 @@ export const PatientDetailPage = async ({ patientId }: PatientDetailProps) => {
   const age = patient.birthDate ? calcAgeFromISO(patient.birthDate) : null;
 
   return (
-    <div>
-      <div className="rounded-lg border border-gray-200 bg-white">
+    <div className="w-full">
+      <div className="rounded-lg border border-gray-200 bg-white w-full ">
         <Table>
           <TableBody>
             <TableRow>

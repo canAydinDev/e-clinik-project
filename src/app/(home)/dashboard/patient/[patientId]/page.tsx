@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { getPatientById } from "@/lib/actions/patient.actions";
+import PatientAppointmentsTable from "@/modules/ui/components/patient-page/dashboard-patient-appointment-page";
 import { PatientDetailPage } from "@/modules/ui/components/patient-page/patient-detail-page";
 import Image from "next/image";
 import Link from "next/link";
@@ -85,19 +86,20 @@ const Patient = async ({ params }: PatientProps) => {
           )}
         </div>
       </div>
-      <div className="flex flex-col lg:flex-row gap-3 lg:gap-0  ">
-        <div className="flex lg:flex-[1]">
+      <div className="flex flex-col lg:flex-row gap-3 lg:gap-2   ">
+        <div className="flex lg:flex-[1] border-2 p-3 rounded-2xl">
           <PatientDetailPage patientId={patientId} />
         </div>
-        <div className="flex flex-col lg:flex-[2]">
-          <div className="flex  flex-row gap-2 items-center justify-center mt-5  ">
-            <div>
-              <Button asChild variant="elevated">
-                <Link href={`/admin/appointments/${patientId}`}>
-                  Randevu Al
-                </Link>
-              </Button>
-            </div>
+        <div className="lg:flex-[2] mt-8 lg:mt-0 border-2 p-3 rounded-2xl">
+          <PatientAppointmentsTable patientId={patientId} />
+        </div>
+        <div className="flex flex-col lg:flex-[1]">
+          <div className="flex  flex-row gap-2 items-start justify-center mt-5 flex-1 ">
+            <Button asChild variant="elevated" className="w-full">
+              <Link href={`/dashboard/appointments/${patientId}`}>
+                Yeni Randevu Al
+              </Link>
+            </Button>
           </div>
         </div>
       </div>

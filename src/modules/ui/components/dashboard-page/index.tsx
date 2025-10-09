@@ -1,20 +1,9 @@
-"use client";
-
-import { Button } from "@/components/ui/button";
-import { logout } from "@/lib/client/auth";
-import Link from "next/link";
+import { DashboardPatientsHomePage } from "../patient-page/dashboard-patients-homepage";
 
 export const DashboardPage = () => {
   return (
-    <div>
-      <h1 className="text-[32px] font-bold md:text-[36px]">Dashboard</h1>
-      <div>
-        <Button asChild>
-          <Link href="/" onClick={() => logout()}>
-            Cikis
-          </Link>
-        </Button>
-      </div>
+    <div className="mx-2 my-2 md:mx-5 xl:mx-10">
+      <DashboardPatientsHomePage />
     </div>
   );
 };

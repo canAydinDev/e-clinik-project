@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { getPatientById } from "@/lib/actions/patient.actions";
 import { ExaminationHomePage } from "@/modules/ui/components/admin-page/examination-page/examination-ana-homepage";
+import PatientAppointmentsTable from "@/modules/ui/components/patient-page/dashboard-patient-appointment-page";
 import { PatientDetailPage } from "@/modules/ui/components/patient-page/patient-detail-page";
 import Image from "next/image";
 import Link from "next/link";
@@ -87,12 +88,15 @@ const Patient = async ({ params }: PatientProps) => {
         </div>
       </div>
       <div className="flex flex-col lg:flex-row gap-3 lg:gap-0  ">
-        <div className="flex lg:flex-[1]">
+        <div className="flex lg:flex-[1] w-full">
           <PatientDetailPage patientId={patientId} />
         </div>
-        <div className="flex flex-col lg:flex-[2]">
-          <div className="flex">
+        <div className="flex flex-col lg:flex-[2] gap-3  justify-between p-3">
+          <div className="flex flex-[2] w-full ">
             <ExaminationHomePage patientId={patientId} />
+          </div>
+          <div className="lg:flex-[1] mt-8 lg:mt-0 border-2  rounded-2xl p-3">
+            <PatientAppointmentsTable patientId={patientId} />
           </div>
 
           <div className="flex  flex-row gap-2 items-center justify-center mt-5  ">
