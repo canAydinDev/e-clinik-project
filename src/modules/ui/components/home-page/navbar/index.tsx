@@ -58,10 +58,10 @@ export const Navbar = () => {
   return (
     <nav className="h-20 flex border-b justify-between font-medium bg-[#e6ddde] pr-5">
       <div className="flex items-center w-full gap-4 justify-between">
-        <Link href="/dashboard" className="pl-6 my-auto flex items-center">
+        <Link href="/dashboard" className="pl-6 my-auto flex items-center ">
           <span
             className={cn(
-              "text-5xl font-semibold text-[#654a4e]",
+              "text-2xl md:text-5xl font-semibold text-[#654a4e]",
               playFair.className
             )}
           >
@@ -86,7 +86,7 @@ export const Navbar = () => {
           ))}
         </div>
 
-        <div className="flex lg:hidden items-center justify-center">
+        <div className="flex lg:hidden items-center justify-center ">
           <Button
             variant="ghost"
             className="size-12 border-transparent bg-white"
@@ -96,7 +96,7 @@ export const Navbar = () => {
           </Button>
         </div>
 
-        <div className="flex flex-shrink-0 items-center gap-4">
+        <div className="flex flex-shrink-0 items-center gap-4 ">
           <AuthButton />
         </div>
       </div>

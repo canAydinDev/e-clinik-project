@@ -13,12 +13,9 @@ const Register = async ({ params }: RegisterProps) => {
       <div className="flex h-screen max-h-screen">
         <section className="remove-scrollbar container ">
           <div>
-            <h1>{user.name}</h1>
-          </div>
-          <div>
             <RegisterForm user={user} />
 
-            <p className="copyright py-12">© 2024 BizimKlinik</p>
+            <p className="copyright py-4 md:py-12">© 2024 BizimKlinik</p>
           </div>
         </section>
       </div>

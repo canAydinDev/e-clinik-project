@@ -68,16 +68,12 @@ export const RegisterForm = ({ user }: RegisterFormProps) => {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-12 flex-1"
+        className="space-y-6 flex-1 my-2 md:my-8"
       >
-        <section className="space-y-4">
-          <h1 className="header">Hoşgeldiniz 👋 </h1>
+        <section className="">
+          <h1 className="text-lg">Yeni Hasta Kaydı </h1>
         </section>
-        <section className="space-y-6">
-          <div className="mb-9 space-y-1">
-            <h2 className="sub-header">Yeni Hasta Kaydı</h2>
-          </div>
-        </section>
+
         <CustomFormField<z.infer<typeof PatientFormValidation>>
           fieldType={FormFieldType.INPUT}
           control={form.control}
