@@ -36,11 +36,13 @@ type AppointmentDoc = {
   status?: string;
 };
 
+type DayAppointment = AppointmentDoc & { startAt: Date; endAt: Date };
+
 type DayContext = {
   workStartUtc: Date;
   workEndUtc: Date;
   dayStartUtc: Date;
-  appointments: Array<AppointmentDoc & { start: Date; end: Date }>;
+  appointments: DayAppointment[];
 };
 
 export type DayScheduleSlot = {
@@ -139,18 +141,18 @@ const buildDayContext = async (
     Query.orderAsc("schedule"),
   ]);
 
-  const appointments = (appts.documents as unknown as AppointmentDoc[]).map(
-    (doc) => {
-      const start = new Date(doc.schedule);
-      const end = doc.end
-        ? new Date(doc.end)
-        : addMinutes(
-            start,
-            doc.durationMin ?? fallbackDurationMin ?? SLOT_STEP_MIN
-          );
-      return { ...doc, start, end };
-    }
-  );
+  const appointments: DayAppointment[] = (
+    appts.documents as unknown as AppointmentDoc[]
+  ).map((doc) => {
+    const startAt = new Date(doc.schedule);
+    const endAt = doc.end
+      ? new Date(doc.end)
+      : addMinutes(
+          startAt,
+          doc.durationMin ?? fallbackDurationMin ?? SLOT_STEP_MIN
+        );
+    return { ...doc, startAt, endAt };
+  });
 
   return { workStartUtc, workEndUtc, dayStartUtc, appointments };
 };
@@ -164,7 +166,7 @@ export async function getAvailableSlotsForDayAction(
 
   const { workStartUtc, workEndUtc, dayStartUtc, appointments } = context;
   const busy = appointments
-    .map<Block>(({ start, end }) => ({ start, end }))
+    .map<Block>(({ startAt, endAt }) => ({ start: startAt, end: endAt }))
     .sort((a, b) => a.start.getTime() - b.start.getTime());
 
   // 6) Bugün ise, 'şu an'ı (TZ) step'e yuvarla ve minimumu yükselt
@@ -262,7 +264,7 @@ export async function getDayScheduleAction(
           start: cur,
           end: slotEnd,
         },
-        { start: apt.start, end: apt.end }
+        { start: apt.startAt, end: apt.endAt }
       )
     );
 
