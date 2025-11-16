@@ -7,6 +7,7 @@ import {
   APPOINTMENT_COLLECTION_ID,
   OPENING_HOURS_COLLECTION_ID,
   CLOSED_DAYS_COLLECTION_ID,
+  PATIENT_COLLECTION_ID,
   Query,
 } from "@/lib/server/appwrite";
 
@@ -24,6 +25,41 @@ type OpeningHoursDoc = {
 };
 type Slot = { start: string; end: string; label: string };
 type Block = { start: Date; end: Date };
+
+type AppointmentDoc = {
+  $id: string;
+  patient?: string | { $id?: string; name?: string };
+  schedule: string;
+  end?: string;
+  durationMin?: number;
+  reason?: string;
+  status?: string;
+};
+
+type DayContext = {
+  workStartUtc: Date;
+  workEndUtc: Date;
+  dayStartUtc: Date;
+  appointments: Array<AppointmentDoc & { start: Date; end: Date }>;
+};
+
+export type DayScheduleSlot = {
+  start: string;
+  end: string;
+  label: string;
+  status: "free" | "booked";
+  appointmentId?: string;
+  patientId?: string;
+  patientName?: string;
+  reason?: string;
+};
+
+export type DayScheduleResponse = {
+  timezone: string;
+  openingLabel: string | null;
+  closingLabel: string | null;
+  slots: DayScheduleSlot[];
+};
 
 // HH:mm → dakika (güvenli)
 const parseHHMM = (s: string): number => {
@@ -53,29 +89,26 @@ const isSameLocalDay = (aUtc: Date, bUtc: Date) => {
   );
 };
 
-export async function getAvailableSlotsForDayAction(
-  dateStr: string, // "YYYY-MM-DD" (yerel)
-  durationMin: number
-): Promise<Slot[]> {
+const buildDayContext = async (
+  dateStr: string,
+  fallbackDurationMin?: number
+): Promise<DayContext | null> => {
   const databases = getDatabases();
   const dbId = DATABASE_ID();
   const closedDaysCol = CLOSED_DAYS_COLLECTION_ID();
   const openingHoursCol = OPENING_HOURS_COLLECTION_ID();
   const appointmentCol = APPOINTMENT_COLLECTION_ID();
 
-  // 1) Yerel gün 00:00 → UTC
   const dayStartUtc = fromZonedTime(`${dateStr} 00:00:00`, TZ);
   const dayEndUtc = addMinutes(dayStartUtc, 24 * 60);
 
-  // 2) Kapalı gün mü?
   const closed = await databases.listDocuments(dbId, closedDaysCol, [
     Query.equal("date", dateStr),
   ]);
-  if (closed.total > 0) return [];
+  if (closed.total > 0) return null;
 
-  // 3) Haftanın günü (1=Mon..7=Sun) ve opening_hours kaydını al
   const localDayStart = toZonedTime(dayStartUtc, TZ);
-  const js = localDayStart.getDay(); // 0=Sun..6=Sat
+  const js = localDayStart.getDay();
   const weekday = ((js + 6) % 7) + 1;
 
   const ohRes = await databases.listDocuments(dbId, openingHoursCol, [
@@ -89,16 +122,13 @@ export async function getAvailableSlotsForDayAction(
     typeof ohDoc.open !== "string" ||
     typeof ohDoc.close !== "string"
   ) {
-    // O gün için kayıt yoksa slot üretilmez
-    return [];
+    return null;
   }
 
-  // 4) Çalışma aralığı (UTC)
   const workStartUtc = addMinutes(dayStartUtc, parseHHMM(ohDoc.open));
   const workEndUtc = addMinutes(dayStartUtc, parseHHMM(ohDoc.close));
-  if (workEndUtc <= workStartUtc) return []; // kapalı veya geçersiz aralık
+  if (workEndUtc <= workStartUtc) return null;
 
-  // 5) Mevcut randevuları çek (iptaller hariç)
   const appts = await databases.listDocuments(dbId, appointmentCol, [
     Query.between(
       "schedule",
@@ -109,22 +139,33 @@ export async function getAvailableSlotsForDayAction(
     Query.orderAsc("schedule"),
   ]);
 
-  const busyFromAppointments: Block[] = (
-    appts.documents as unknown as Array<{
-      schedule: string;
-      end?: string;
-      durationMin?: number;
-    }>
-  ).map((d) => ({
-    start: new Date(d.schedule),
-    end: d.end
-      ? new Date(d.end)
-      : addMinutes(new Date(d.schedule), d.durationMin ?? durationMin),
-  }));
-
-  const busy = busyFromAppointments.sort(
-    (a, b) => a.start.getTime() - b.start.getTime()
+  const appointments = (appts.documents as unknown as AppointmentDoc[]).map(
+    (doc) => {
+      const start = new Date(doc.schedule);
+      const end = doc.end
+        ? new Date(doc.end)
+        : addMinutes(
+            start,
+            doc.durationMin ?? fallbackDurationMin ?? SLOT_STEP_MIN
+          );
+      return { ...doc, start, end };
+    }
   );
+
+  return { workStartUtc, workEndUtc, dayStartUtc, appointments };
+};
+
+export async function getAvailableSlotsForDayAction(
+  dateStr: string, // "YYYY-MM-DD" (yerel)
+  durationMin: number
+): Promise<Slot[]> {
+  const context = await buildDayContext(dateStr, durationMin);
+  if (!context) return [];
+
+  const { workStartUtc, workEndUtc, dayStartUtc, appointments } = context;
+  const busy = appointments
+    .map<Block>(({ start, end }) => ({ start, end }))
+    .sort((a, b) => a.start.getTime() - b.start.getTime());
 
   // 6) Bugün ise, 'şu an'ı (TZ) step'e yuvarla ve minimumu yükselt
   const nowUtcRounded = fromZonedTime(
@@ -161,4 +202,124 @@ export async function getAvailableSlotsForDayAction(
   }
 
   return slots;
+}
+
+export async function getDayScheduleAction(
+  dateStr: string
+): Promise<DayScheduleResponse> {
+  const context = await buildDayContext(dateStr);
+  if (!context) {
+    return {
+      timezone: TZ,
+      openingLabel: null,
+      closingLabel: null,
+      slots: [],
+    };
+  }
+
+  const databases = getDatabases();
+  const patientIds = Array.from(
+    new Set(
+      context.appointments
+        .map((apt) =>
+          typeof apt.patient === "string"
+            ? apt.patient
+            : (apt.patient as { $id?: string })?.$id
+        )
+        .filter((v): v is string => Boolean(v))
+    )
+  );
+
+  const patientNames = new Map<string, string>();
+  if (patientIds.length > 0) {
+    const res = await databases.listDocuments(
+      DATABASE_ID(),
+      PATIENT_COLLECTION_ID(),
+      [Query.equal("$id", patientIds), Query.limit(patientIds.length)]
+    );
+    res.documents.forEach((doc) => {
+      patientNames.set(
+        String(doc.$id),
+        typeof (doc as { name?: unknown }).name === "string"
+          ? ((doc as { name?: string }).name ?? "Bilinmeyen")
+          : "Bilinmeyen"
+      );
+    });
+  }
+
+  const slots: DayScheduleSlot[] = [];
+  for (
+    let cur = new Date(context.workStartUtc);
+    isBefore(cur, context.workEndUtc);
+    cur = addMinutes(cur, SLOT_STEP_MIN)
+  ) {
+    const slotEnd = addMinutes(cur, SLOT_STEP_MIN);
+    if (slotEnd > context.workEndUtc) break;
+
+    const overlapping = context.appointments.find((apt) =>
+      overlaps(
+        {
+          start: cur,
+          end: slotEnd,
+        },
+        { start: apt.start, end: apt.end }
+      )
+    );
+
+    const local = toZonedTime(cur, TZ);
+    const label = local.toLocaleTimeString("tr-TR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    if (overlapping) {
+      const patientId =
+        typeof overlapping.patient === "string"
+          ? overlapping.patient
+          : (overlapping.patient as { $id?: string })?.$id;
+      const patientNameFromDoc =
+        typeof overlapping.patient === "object" &&
+        overlapping.patient !== null &&
+        "name" in overlapping.patient
+          ? String((overlapping.patient as { name?: unknown }).name ?? "")
+          : undefined;
+
+      slots.push({
+        start: cur.toISOString(),
+        end: slotEnd.toISOString(),
+        label,
+        status: "booked",
+        appointmentId: overlapping.$id,
+        reason: overlapping.reason,
+        patientId,
+        patientName:
+          patientNameFromDoc ||
+          (patientId ? patientNames.get(patientId) : undefined) ||
+          "Rezerve",
+      });
+    } else {
+      slots.push({
+        start: cur.toISOString(),
+        end: slotEnd.toISOString(),
+        label,
+        status: "free",
+      });
+    }
+  }
+
+  const openingLabel = toZonedTime(context.workStartUtc, TZ).toLocaleTimeString(
+    "tr-TR",
+    { hour: "2-digit", minute: "2-digit" }
+  );
+  const closingLabel = toZonedTime(context.workEndUtc, TZ).toLocaleTimeString(
+    "tr-TR",
+    { hour: "2-digit", minute: "2-digit" }
+  );
+
+  return {
+    timezone: TZ,
+    openingLabel,
+    closingLabel,
+    slots,
+  };
 }

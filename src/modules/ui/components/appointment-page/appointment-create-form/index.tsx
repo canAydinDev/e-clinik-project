@@ -15,10 +15,13 @@ import { FormFieldType } from "../../patient-page/patient-form";
 import { getAppointmentSchema } from "@/lib/validation";
 
 import { createAppointment } from "@/lib/actions/appointment.actions";
-import { getAvailableSlotsForDayAction } from "@/lib/actions/getSlots.actions";
+import {
+  getAvailableSlotsForDayAction,
+} from "@/lib/actions/getSlots.actions";
 
 import type { AppointmentFormData } from "../../../../../../types/form";
 import { toast } from "sonner";
+import { DayScheduleGrid } from "../day-schedule-grid";
 
 const SERVICES = [
   { id: "botox", name: "Botoks", durationMin: 30 },
@@ -49,6 +52,7 @@ export function AppointmentCreateForm({
   const [slots, setSlots] = React.useState<SlotItem[]>([]);
   const [isFetchingSlots, setIsFetchingSlots] = React.useState(false);
   const [selectedSlot, setSelectedSlot] = React.useState<string | null>(null);
+  const [scheduleRefreshKey, setScheduleRefreshKey] = React.useState(0);
 
   const durationMin: number = React.useMemo(() => {
     const found = SERVICES.find((s) => s.id === serviceId);
@@ -118,6 +122,7 @@ export function AppointmentCreateForm({
         form.reset();
         setSelectedSlot(null);
         setSlots([]);
+        setScheduleRefreshKey((key) => key + 1);
         if (setOpen) setOpen(false);
         router.push(`/admin/patient/${patientId}`);
       }
@@ -210,6 +215,7 @@ export function AppointmentCreateForm({
             </Button>
           ))}
         </div>
+        <DayScheduleGrid date={date} refreshKey={scheduleRefreshKey} />
 
         {/* Ek alanlar */}
         <div className="flex flex-col gap-6 xl:flex-row">
