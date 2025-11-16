@@ -15,13 +15,15 @@ export const patientColumns: ColumnDef<Patient>[] = [
     cell: ({ row }) => {
       const imageUrl = row.original.faceUrl;
       return imageUrl ? (
-        <Image
-          src={imageUrl}
-          alt={"pic"}
-          width={80}
-          height={80}
-          className="rounded-2xl object-cover"
-        />
+        <div className="flex items-center justify-center">
+          <Image
+            src={imageUrl}
+            alt="Hasta Fotoğrafı"
+            width={64}
+            height={64}
+            className="h-16 w-16 rounded-2xl border border-gray-200 object-cover shadow-sm"
+          />
+        </div>
       ) : (
         <span className="text-gray-400">Yok</span>
       );
