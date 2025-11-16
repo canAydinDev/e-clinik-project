@@ -90,12 +90,10 @@ export const DayScheduleGrid: React.FC<DayScheduleGridProps> = ({
         {loading && (
           <p className="text-sm text-gray-500">Takvim yükleniyor...</p>
         )}
-        {error && !loading && (
-          <p className="text-sm text-red-500">{error}</p>
-        )}
+        {error && !loading && <p className="text-sm text-red-500">{error}</p>}
         {!loading && !error && slots.length === 0 && (
           <p className="text-sm text-gray-500">
-            Bu gün için çalışma saati veya slot tanımlanmamış.
+            Bu gün için çalışma saati tanımlanmamış.
           </p>
         )}
         {!loading && !error && slots.length > 0 && (
@@ -103,7 +101,9 @@ export const DayScheduleGrid: React.FC<DayScheduleGridProps> = ({
             {slots.map((slot) => (
               <div
                 key={slot.start}
-                className={`rounded-lg p-2 text-xs font-medium shadow-sm transition hover:opacity-90 ${slotColors[slot.status]}`}
+                className={`rounded-lg p-2 text-xs font-medium shadow-sm transition hover:opacity-90 ${
+                  slotColors[slot.status]
+                }`}
                 title={
                   slot.status === "booked"
                     ? `${slot.patientName ?? "Rezerve"} • ${
